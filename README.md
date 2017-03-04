@@ -9,6 +9,7 @@ Itch.io Page (Coming Soon)
 
 ## Tools/Frameworks/Etc ##
 * [Phaser.io][10]
+* [alexei/sprintf][11]
 
 ## Links ##
 * [Trello Board][1] (Planning, what's that?)
@@ -18,3 +19,4 @@ Itch.io Page (Coming Soon)
 [2]: https://itch.io/jam/resistjam
 [3]: https://twitter.com/Zambini845
 [10]: http://phaser.io/
+[11]: https://github.com/alexei/sprintf.js

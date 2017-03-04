@@ -1,3 +1,4 @@
+var window_cmd;
 class GameState {
   constructor(payload) {}
   preload() {
@@ -5,12 +6,61 @@ class GameState {
   }
   create() {
     this.gameObjects = [];
+    this.windowStack = [];
     // Create the three window panels
-    this.gameObjects.push(new FilterWindow());
-    this.gameObjects.push(new MapWindow());
-    this.gameObjects.push(new LogWindow());
+    this.initWindowStack();
     // Initialize the shader
     this.initShader();
+    // Handle inputs
+    this.initKeyboardHandlers();
+  }
+  initWindowStack() {
+    this.currentWindowIndex = 0;
+    this.windowStack.push(new FilterWindow());
+    this.windowStack.push(new MapWindow());
+    this.windowStack.push(new LogWindow());
+    this.windowStack.push(new CommandWindow());
+    this.selectWindow(this.currentWindowIndex);
+  }
+  initKeyboardHandlers() {
+    this.keys = {};
+    var state = this;
+    // Window Tabbery key
+    var keyNextWindow = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
+    keyNextWindow.onDown.add(this.nextWindow, this);
+    this.keys['nextWindow'] = keyNextWindow;
+    // Backspace key
+    var keyBackspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
+    keyBackspace.onDown.add(this.onBackspace, this);
+    this.keys['backspace'] = keyBackspace;
+    // Plaintext input
+    this.game.input.keyboard.onPressCallback = function(event) {
+      state.onDownCallback(event, this);
+    };
+  }
+  nextWindow(event) {
+    this.deselectWindow(this.currentWindowIndex)
+    var reversed = game.input.keyboard.isDown(Phaser.KeyCode.SHIFT);
+    if (reversed) {
+      this.currentWindowIndex = (this.currentWindowIndex == 0) ? this.windowStack.length - 1 : this.currentWindowIndex - 1;
+    } else {
+      this.currentWindowIndex = (this.currentWindowIndex + 1) % this.windowStack.length;
+    }
+    this.selectWindow(this.currentWindowIndex);
+  }
+  onBackspace(event) {
+    var currWindow = this.windowStack[this.currentWindowIndex];
+    currWindow.onBackspace(event);
+  }
+  selectWindow(index) {
+    this.windowStack[index].onGainFocus();
+  }
+  deselectWindow(index) {
+    this.windowStack[index].onLoseFocus();
+  }
+  onDownCallback(event, scope) {
+    var currWindow = this.windowStack[this.currentWindowIndex];
+    currWindow.onDownCallback(event);
   }
   initShader() {
     // Taken from and modified: http://glslsandbox.com/e#18578.0
@@ -60,6 +110,9 @@ class GameState {
     }
   }
   render() {
+    for (var i = this.windowStack.length - 1; i >= 0; i--) {
+      this.windowStack[i].render();
+    }
     for (var i = this.gameObjects.length - 1; i >= 0; i--) {
       this.gameObjects[i].render();
     }
