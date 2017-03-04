@@ -39,17 +39,10 @@ class BaseWindow {
     bmd.ctx.fillStyle = color;
     bmd.ctx.fillRect(x, y, width, height);
   }
-  onLoseFocus() {
-    this.selected = false;
-  }
-  onGainFocus() {
-    this.selected = true;
-  }
-  onDownCallback(event) {
-    console.log(sprintf("Unhandled input: %s", event));
-  }
-  onBackspace(event) {}
-  onEnter(event) {}
+  onTabKey(event) {} // Empty event default
+  onDownCallback(event) {} // Empty event default
+  onBackspace(event) {} // Empty event default
+  onEnter(event) {} // Empty event default
 }
 // Window Consts
 WIN_WIDTH = 800;

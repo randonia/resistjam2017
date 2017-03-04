@@ -21,15 +21,14 @@ class GameState {
     this.windowStack.push(mapWindow);
     this.windowStack.push(new LogWindow());
     this.windowStack.push(new CommandWindow());
-    this.selectWindow(this.currentWindowIndex);
   }
   initKeyboardHandlers() {
     this.keys = {};
     var state = this;
     // Window Tabbery key
-    var keyNextWindow = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
-    keyNextWindow.onDown.add(this.nextWindow, this);
-    this.keys['nextWindow'] = keyNextWindow;
+    var keyTab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
+    keyTab.onDown.add(this.onTabKey, this);
+    this.keys['tab'] = keyTab;
     // Backspace key
     var keyBackspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
     keyBackspace.onDown.add(this.onBackspace, this);
@@ -43,33 +42,22 @@ class GameState {
       state.onDownCallback(event, this);
     };
   }
-  nextWindow(event) {
-    this.deselectWindow(this.currentWindowIndex)
-    var reversed = game.input.keyboard.isDown(Phaser.KeyCode.SHIFT);
-    if (reversed) {
-      this.currentWindowIndex = (this.currentWindowIndex == 0) ? this.windowStack.length - 1 : this.currentWindowIndex - 1;
-    } else {
-      this.currentWindowIndex = (this.currentWindowIndex + 1) % this.windowStack.length;
-    }
-    this.selectWindow(this.currentWindowIndex);
+  onTabKey(event) {
+    this._submitEvent('onTabKey', event);
   }
   onBackspace(event) {
-    this.currentWindow().onBackspace(event);
+    this._submitEvent('onBackspace', event);
   }
   onEnter(event) {
-    this.currentWindow().onEnter(event);
+    this._submitEvent('onEnter', event);
   }
   onDownCallback(event) {
-    this.currentWindow().onDownCallback(event);
+    this._submitEvent('onDownCallback', event);
   }
-  currentWindow() {
-    return this.windowStack[this.currentWindowIndex];
-  }
-  selectWindow(index) {
-    this.windowStack[index].onGainFocus();
-  }
-  deselectWindow(index) {
-    this.windowStack[index].onLoseFocus();
+  _submitEvent(funcName, event) {
+    for (var i = 0; i < this.windowStack.length; i++) {
+      this.windowStack[i][funcName](event);
+    }
   }
   initShader() {
     // Taken from and modified: http://glslsandbox.com/e#18578.0
