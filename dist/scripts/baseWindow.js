@@ -29,6 +29,11 @@ class BaseWindow {
     bmd.ctx.fillStyle = 'green';
     bmd.ctx.fillText(message, x, y);
   }
+  fillRect(x, y, width, height, color = 'green') {
+    var bmd = this.bmp;
+    bmd.ctx.fillStyle = color;
+    bmd.ctx.fillRect(x, y, width, height);
+  }
   onLoseFocus() {
     this.selected = false;
   }
@@ -39,6 +44,7 @@ class BaseWindow {
     console.log(sprintf("Unhandled input: %s", event));
   }
   onBackspace(event) {}
+  onEnter(event) {}
 }
 // Window Consts
 WIN_WIDTH = 800;
@@ -57,6 +63,10 @@ class FilterWindow extends BaseWindow {
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT);
+    this.gameObjects = [];
+  }
+  update() {
+    super.update();
   }
 }
 // Right Window - for showing the log
@@ -83,10 +93,9 @@ class CommandWindow extends BaseWindow {
     super(0, WIN_HEIGHT - WIN_CMDHEIGHT, 800, WIN_CMDHEIGHT);
     this.cmd_history = [];
     this.cmd_current = '';
+    this.blinker = new Blinker(500, 200);
   }
-  update() {
-    super.update();
-  }
+  // Events
   onDownCallback(key) {
     this.cmd_current += key;
   }
@@ -101,11 +110,23 @@ class CommandWindow extends BaseWindow {
     }
     this.cmd_current = str;
   }
+  onEnter(event) {
+    if (this.cmd_current.length > 0) {
+      this.executeCurrentCmd();
+    }
+  }
   render() {
     super.render();
-    for (var i = this.cmd_history.length - 1; i >= 0; i--) {
-      this.drawText(CMD_START_X, CMD_HIST_START_Y - CMD_PADDING * i, '$ ' + this.cmd_history[i]);
+    var cmdLen = this.cmd_history.length;
+    for (var i = cmdLen - 1; i >= 0; i--) {
+      this.drawText(CMD_START_X, CMD_HIST_START_Y - CMD_PADDING * (cmdLen - i - 1), sprintf('# %s', this.cmd_history[i]));
     }
-    this.drawText(CMD_START_X, CMD_START_Y, sprintf('$ %s', this.cmd_current));
+    var cmdStr = sprintf('$ %s%s', this.cmd_current, (this.blinker.blink()) ? '_' : '');
+    this.drawText(CMD_START_X, CMD_START_Y, cmdStr);
+  }
+  executeCurrentCmd() {
+    var cmd = this.cmd_current;
+    this.cmd_history.push(cmd);
+    this.cmd_current = '';
   }
 }

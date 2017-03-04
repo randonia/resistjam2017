@@ -33,6 +33,10 @@ class GameState {
     var keyBackspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
     keyBackspace.onDown.add(this.onBackspace, this);
     this.keys['backspace'] = keyBackspace;
+    // Enter key
+    var keyEnter = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+    keyEnter.onDown.add(this.onEnter, this);
+    this.keys['enter'] = keyEnter;
     // Plaintext input
     this.game.input.keyboard.onPressCallback = function(event) {
       state.onDownCallback(event, this);
@@ -49,18 +53,22 @@ class GameState {
     this.selectWindow(this.currentWindowIndex);
   }
   onBackspace(event) {
-    var currWindow = this.windowStack[this.currentWindowIndex];
-    currWindow.onBackspace(event);
+    this.currentWindow().onBackspace(event);
+  }
+  onEnter(event) {
+    this.currentWindow().onEnter(event);
+  }
+  onDownCallback(event) {
+    this.currentWindow().onDownCallback(event);
+  }
+  currentWindow() {
+    return this.windowStack[this.currentWindowIndex];
   }
   selectWindow(index) {
     this.windowStack[index].onGainFocus();
   }
   deselectWindow(index) {
     this.windowStack[index].onLoseFocus();
-  }
-  onDownCallback(event, scope) {
-    var currWindow = this.windowStack[this.currentWindowIndex];
-    currWindow.onDownCallback(event);
   }
   initShader() {
     // Taken from and modified: http://glslsandbox.com/e#18578.0
