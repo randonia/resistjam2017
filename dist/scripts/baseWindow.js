@@ -13,14 +13,19 @@ class BaseWindow {
     this.bmp = game.add.bitmapData(this.width, this.height);
     this.sprite = game.add.sprite(this.x, this.y, this.bmp);
   }
+  update() {}
   render() {
     var bmd = this.bmp;
     bmd.clear();
-    bmd.ctx.lineWidth = "2";
-    bmd.ctx.strokeStyle = (this.selected) ? "green" : "#535f53";
+    bmd.ctx.lineWidth = '2';
+    bmd.ctx.strokeStyle = (this.selected) ? 'green' : '#535f53';
+    bmd.ctx.fillStyle = '#111';
+    bmd.ctx.fillRect(0, 0, this.width, this.height);
     bmd.ctx.strokeRect(0, 0, this.width, this.height);
   }
-  update() {}
+  addChild(sprite) {
+    this.sprite.addChild(sprite);
+  }
   drawText(x, y, message, size = undefined) {
     var bmd = this.bmp;
     bmd.ctx.font = sprintf("%spx %s", (size || DEFAULT_FONTSIZE), DEFAULT_FONT);
@@ -55,18 +60,31 @@ class FilterWindow extends BaseWindow {
   constructor() {
     super(0, 0, WIN_WIDTH / 4, WIN_HEIGHT - WIN_CMDHEIGHT);
   }
-  render() {
-    super.render();
-  }
 }
 // Center Window - for showing the map
+NUM_NODES = 5000;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT);
     this.gameObjects = [];
+    this.generateNodes('seed'); // Let's pretend I use the seed
   }
-  update() {
-    super.update();
+  generateNodes(seed) {
+    // Do something with a seed I guess?
+    var state = game.state.getCurrentState();
+    var available_types = [
+    Node.TYPE_A,
+    Node.TYPE_B,
+    Node.TYPE_C,
+    Node.TYPE_D,
+    Node.TYPE_E,
+    ];
+    var numNodes = (seed['numNodes'] || NUM_NODES);
+    for (var i = 0; i < numNodes; i++) {
+      var node = new Node(Utils.randomInRange(0, this.width - 16), Utils.randomInRange(0, this.height - 16), available_types[Utils.randomInRange(0, available_types.length)]);
+      this.addChild(node.sprite);
+      state.gameObjects.push(node);
+    }
   }
 }
 // Right Window - for showing the log
