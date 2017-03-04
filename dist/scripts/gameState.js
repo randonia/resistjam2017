@@ -1,8 +1,7 @@
-var window_cmd;
 class GameState {
   constructor(payload) {}
   preload() {
-    console.log("Hello, preloading");
+    game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 5);
   }
   create() {
     this.gameObjects = [];
@@ -16,8 +15,10 @@ class GameState {
   }
   initWindowStack() {
     this.currentWindowIndex = 0;
+    // This ensures the mapwindow is the lowest order
+    var mapWindow = new MapWindow();
     this.windowStack.push(new FilterWindow());
-    this.windowStack.push(new MapWindow());
+    this.windowStack.push(mapWindow);
     this.windowStack.push(new LogWindow());
     this.windowStack.push(new CommandWindow());
     this.selectWindow(this.currentWindowIndex);
