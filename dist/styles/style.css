@@ -1,0 +1,29 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #020502;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    height: 40px;
+}
+
+.game-container {
+    height: 600px;
+    outline: 1px solid #315f31;
+    margin: 0 auto;
+    width: 800px;
+}
+
+.footer {
+    height: 20px;
+}
