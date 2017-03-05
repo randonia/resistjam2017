@@ -86,13 +86,13 @@ class FilterWindow extends BaseWindow {
     var fromIdCtr = availableFilters.length;
     for (var i = 0; i < availableFilters.length; i++) {
       this.filters.push({
-        'set': false,
+        'set': true,
         'id': toIdCtr++,
         'type': availableFilters[i],
         'direction': 'to'
       });
       this.filters.push({
-        'set': false,
+        'set': true,
         'id': fromIdCtr++,
         'type': availableFilters[i],
         'direction': 'from'
@@ -154,7 +154,8 @@ class FilterWindow extends BaseWindow {
   }
 }
 // Center Window - for showing the map
-NUM_NODES = 5;
+NUM_NODES = 500;
+NODE_SIZE = 16;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
@@ -175,7 +176,7 @@ class MapWindow extends BaseWindow {
     ];
     var numNodes = (seed['numNodes'] || NUM_NODES);
     for (var i = 0; i < numNodes; i++) {
-      var node = new Node(Utils.randomInRange(0, this.width - 16), Utils.randomInRange(0, this.height - 16), available_types[Utils.randomInRange(0, available_types.length)]);
+      var node = new Node(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE), available_types[Utils.randomInRange(0, available_types.length)]);
       this.addChild(node.sprite);
       this.gameObjects.push(node);
       state.gameObjects.push(node);
@@ -191,6 +192,10 @@ class MapWindow extends BaseWindow {
         lookups[direction] = {};
       }
       lookups[direction][type] = isSet;
+    }
+    for (var i = 0; i < this.gameObjects.length; i++) {
+      var node = this.gameObjects[i];
+      node.setVisible(lookups['to'][node.type] || lookups['from'][node.type]);
     }
   }
   update() {
@@ -219,10 +224,14 @@ class MapWindow extends BaseWindow {
     var halfSize = 8;
     var bmd = this.bmp;
     for (var gIdx = 0; gIdx < this.gameObjects.length; gIdx++) {
-      var path = this.gameObjects[gIdx].path;
+      var node = this.gameObjects[gIdx];
+      if (!node.visible) {
+        continue;
+      }
+      var path = node.path;
       // Get the starting position (p1)
-      var lastX = this.gameObjects[gIdx].x + halfSize;
-      var lastY = this.gameObjects[gIdx].y + halfSize;
+      var lastX = node.x + halfSize;
+      var lastY = node.y + halfSize;
       // Move to the starting position
       bmd.ctx.beginPath();
       bmd.ctx.moveTo(lastX, lastY);

@@ -43,14 +43,38 @@ class Node {
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = Node.getFrameFromType(type);
     this.path = [];
+    this.visible = true;
   }
-  update() {}
+  update() {
+    if (Math.random() < 0.05) {
+      var dirX = Math.random() - 0.5;
+      var dirY = Math.random() - 0.5;
+      this.x += dirX;
+      this.y += dirY;
+      if (this.x < 0) {
+        this.x += 1;
+      }
+      if (WIN_WIDTH / 2 - NODE_SIZE < this.x) {
+        this.x -= 1;
+      }
+      if (this.y < 0) {
+        this.y += 1;
+      }
+      if (WIN_HEIGHT - WIN_CMDHEIGHT - NODE_SIZE < this.y) {
+        this.y -= 1;
+      }
+    }
+  }
   render() {
     this.sprite.x = this.x;
     this.sprite.y = this.y;
   }
   generateId(type) {
     return Math.random();
+  }
+  setVisible(value) {
+    this.visible = value;
+    this.sprite.visible = this.visible;
   }
   addToPath(otherNode) {
     this.path.push(otherNode);
