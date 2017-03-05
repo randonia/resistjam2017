@@ -1,3 +1,4 @@
+var DBGWINDOW = undefined;
 class GameState {
   constructor(payload) {}
   preload() {
@@ -18,6 +19,7 @@ class GameState {
     // This ensures the mapwindow is the lowest order
     var mapWindow = new MapWindow();
     this.windowStack.push(new FilterWindow());
+    DBGWINDOW = this.windowStack[0];
     this.windowStack.push(mapWindow);
     this.windowStack.push(new LogWindow());
     this.windowStack.push(new CommandWindow());
