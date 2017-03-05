@@ -1,18 +1,23 @@
 class Node {
   static get TYPE_A() {
-    return 1001;
+    return 'SUBJ_A';
   }
   static get TYPE_B() {
-    return 1002;
+    return 'SUBJ_B';
   }
   static get TYPE_C() {
-    return 1003;
+    return 'SUBJ_C';
   }
   static get TYPE_D() {
-    return 1004;
+    return 'SUBJ_D';
   }
   static get TYPE_E() {
-    return 1005;
+    return 'SUBJ_E';
+  }
+  static getTypes() {
+    return [
+      Node.TYPE_A, Node.TYPE_B, Node.TYPE_C, Node.TYPE_D, Node.TYPE_E
+    ]
   }
   static getFrameFromType(type) {
     switch (type) {
