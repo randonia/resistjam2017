@@ -30,17 +30,13 @@ class MapWindow extends BaseWindow {
   execFilter(filters) {
     var lookups = {};
     for (var i = 0; i < filters.length; i++) {
-      var direction = filters[i].direction;
       var type = filters[i].type;
       var isSet = filters[i].set;
-      if (!lookups[direction]) {
-        lookups[direction] = {};
-      }
-      lookups[direction][type] = isSet;
+      lookups[type] = isSet;
     }
     for (var i = 0; i < this.gameObjects.length; i++) {
       var node = this.gameObjects[i];
-      node.setVisible(lookups['to'][node.type] || lookups['from'][node.type]);
+      node.setVisible(lookups[node.type]);
     }
   }
   update() {
