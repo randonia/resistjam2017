@@ -105,16 +105,19 @@ class FilterWindow extends BaseWindow {
       }
     }
   }
-  setFilter(filterTypes) {
-    this.filters = filterTypes;
+  processFilterCmd(filterCmd) {
+    var filterArg = filterCmd.getArg(0);
+    for (var i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].id == filterArg) {
+        this.filters[i].set = !this.filters[i].set;
+      }
+    }
     this.resetFilter();
   }
   resetFilter() {
     var state = game.state.getCurrentState();
     var mapWindow = state.getWindow(BaseWindow.TYPE_MAP);
-    mapWindow.execFilter(this.filters.filter(function(item) {
-      return item.set;
-    }));
+    mapWindow.execFilter(this.filters);
   }
   filterTo(item) {
     return item.direction == 'to';
@@ -151,12 +154,14 @@ class FilterWindow extends BaseWindow {
   }
 }
 // Center Window - for showing the map
-NUM_NODES = 5000;
+NUM_NODES = 5;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     this.gameObjects = [];
     this.generateNodes('seed'); // Let's pretend I use the seed
+    this.callCooldown = 500;
+    this.lastCallMade = Number.MIN_VALUE;
   }
   generateNodes(seed) {
     // Do something with a seed I guess?
@@ -172,11 +177,85 @@ class MapWindow extends BaseWindow {
     for (var i = 0; i < numNodes; i++) {
       var node = new Node(Utils.randomInRange(0, this.width - 16), Utils.randomInRange(0, this.height - 16), available_types[Utils.randomInRange(0, available_types.length)]);
       this.addChild(node.sprite);
+      this.gameObjects.push(node);
       state.gameObjects.push(node);
     }
   }
   execFilter(filters) {
-    console.log(filters);
+    var lookups = {};
+    for (var i = 0; i < filters.length; i++) {
+      var direction = filters[i].direction;
+      var type = filters[i].type;
+      var isSet = filters[i].set;
+      if (!lookups[direction]) {
+        lookups[direction] = {};
+      }
+      lookups[direction][type] = isSet;
+    }
+  }
+  update() {
+    super.update();
+    this.makeCall();
+  }
+  makeCall() {
+    if (this.canMakeCall()) {}
+  }
+  canMakeCall() {
+    var now = Date.now();
+    if (this.lastCallMade + this.callCooldown < now) {
+      var srcIdx = Utils.randomInRange(0, this.gameObjects.length);
+      var dstIdx = Utils.randomInRange(0, this.gameObjects.length);
+      // Make sure you don't add yourself
+      if (srcIdx === dstIdx) {
+        return false;
+      }
+      this.gameObjects[srcIdx].addToPath(this.gameObjects[dstIdx]);
+      this.lastCallMade = now;
+      this.callCooldown = 200 + Utils.randomInRange(100, 1500);
+    }
+  }
+  render() {
+    super.render();
+    var halfSize = 8;
+    var bmd = this.bmp;
+    for (var gIdx = 0; gIdx < this.gameObjects.length; gIdx++) {
+      var path = this.gameObjects[gIdx].path;
+      // Get the starting position (p1)
+      var lastX = this.gameObjects[gIdx].x + halfSize;
+      var lastY = this.gameObjects[gIdx].y + halfSize;
+      // Move to the starting position
+      bmd.ctx.beginPath();
+      bmd.ctx.moveTo(lastX, lastY);
+      for (var pIdx = 0; pIdx < path.length; pIdx++) {
+        var target = path[pIdx];
+        bmd.ctx.moveTo(lastX, lastY);
+        // Get the target's positions (p2)
+        var newX = target.x + halfSize;
+        var newY = target.y + halfSize;
+        // fake vector math here (p2 - p1)
+        var tailX = newX - lastX;
+        var tailY = newY - lastY;
+        // (shortX, shortY) is a point short of the target, for multi-color lining
+        var shortPointX = tailX * 0.125;
+        var shortPointY = tailY * 0.125;
+        var shortX = newX - shortPointX;
+        var shortY = newY - shortPointY;
+        bmd.ctx.lineWidth = '1';
+        bmd.ctx.strokeStyle = 'green';
+        bmd.ctx.lineTo(shortX, shortY);
+        bmd.ctx.stroke();
+        bmd.ctx.closePath();
+        bmd.ctx.beginPath();
+        bmd.ctx.lineWidth = '3';
+        bmd.ctx.strokeStyle = 'yellow';
+        bmd.ctx.moveTo(shortX, shortY);
+        bmd.ctx.lineTo(newX, newY);
+        bmd.ctx.stroke();
+        lastX = newX;
+        lastY = newY;
+      }
+      bmd.ctx.closePath();
+    }
   }
 }
 // Right Window - for showing the log
@@ -246,7 +325,7 @@ class CommandWindow extends BaseWindow {
     var command = new Command(cmdStr);
     switch (command.type) {
       case Command.TYPE_FILTER:
-        console.log("Need to make filtering");
+        this.execCmdFilter(command);
         break;
       case Command.TYPE_HELP:
         this.execCmdHelp(command);
@@ -295,5 +374,9 @@ class CommandWindow extends BaseWindow {
     for (var hsIdx = 0; hsIdx < helpStrings.length; hsIdx++) {
       this.pushMessage(helpStrings[hsIdx]);
     }
+  }
+  execCmdFilter(command) {
+    var filterWindow = game.state.getCurrentState().getWindow(BaseWindow.TYPE_FILTER);
+    filterWindow.processFilterCmd(command);
   }
 }

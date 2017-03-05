@@ -42,6 +42,7 @@ class Node {
     this.id = this.generateId(type);
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = Node.getFrameFromType(type);
+    this.path = [];
   }
   update() {}
   render() {
@@ -49,6 +50,9 @@ class Node {
     this.sprite.y = this.y;
   }
   generateId(type) {
-    return
+    return Math.random();
+  }
+  addToPath(otherNode) {
+    this.path.push(otherNode);
   }
 }

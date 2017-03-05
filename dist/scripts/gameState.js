@@ -18,8 +18,8 @@ class GameState {
     this.currentWindowIndex = 0;
     // This ensures the mapwindow is the lowest order
     var mapWindow = new MapWindow();
+    DBGWINDOW = mapWindow;
     this.windowStack.push(new FilterWindow());
-    DBGWINDOW = this.windowStack[0];
     this.windowStack.push(mapWindow);
     this.windowStack.push(new LogWindow());
     this.windowStack.push(new CommandWindow());
@@ -103,7 +103,17 @@ class GameState {
     this.scanlineSprite.height = 600;
     this.scanlineSprite.filters = [this.scanlineFilter];
   }
+  getWindow(windowType) {
+    for (var i = 0; i < this.windowStack.length; i++) {
+      if (this.windowStack[i].type == windowType) {
+        return this.windowStack[i];
+      }
+    }
+  }
   update() {
+    for (var i = 0; i < this.windowStack.length; i++) {
+      this.windowStack[i].update();
+    }
     for (var i = this.gameObjects.length - 1; i >= 0; i--) {
       this.gameObjects[i].update();
     }
