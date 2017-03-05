@@ -82,16 +82,18 @@ class FilterWindow extends BaseWindow {
     this.filters = [];
     this.nodeSprites = [];
     var availableFilters = Node.getTypes();
+    var toIdCtr = 0;
+    var fromIdCtr = availableFilters.length;
     for (var i = 0; i < availableFilters.length; i++) {
       this.filters.push({
-        'set': false,
-        'id': i,
+        'set': true,
+        'id': toIdCtr++,
         'type': availableFilters[i],
         'direction': 'to'
       });
       this.filters.push({
-        'set': false,
-        'id': i,
+        'set': true,
+        'id': fromIdCtr++,
         'type': availableFilters[i],
         'direction': 'from'
       });
@@ -103,16 +105,19 @@ class FilterWindow extends BaseWindow {
       }
     }
   }
-  setFilter(filterTypes) {
-    this.filters = filterTypes;
+  processFilterCmd(filterCmd) {
+    var filterArg = filterCmd.getArg(0);
+    for (var i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].id == filterArg) {
+        this.filters[i].set = !this.filters[i].set;
+      }
+    }
     this.resetFilter();
   }
   resetFilter() {
     var state = game.state.getCurrentState();
     var mapWindow = state.getWindow(BaseWindow.TYPE_MAP);
-    mapWindow.execFilter(this.filters.filter(function(item) {
-      return item.set;
-    }));
+    mapWindow.execFilter(this.filters);
   }
   filterTo(item) {
     return item.direction == 'to';
@@ -127,10 +132,9 @@ class FilterWindow extends BaseWindow {
     var toFilters = this.filters.filter(this.filterTo);
     var toFiltersLastY = 0;
     var spritePaddingX = 54;
-    var ctr = 0;
     for (var i = 0; i < toFilters.length; i++) {
       var currFilter = toFilters[i];
-      var str = sprintf("%s)[%s]......to %s", ('0000' + ctr++).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
+      var str = sprintf("%s)[%s]......to %s", ('0000' + currFilter.id).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
       toFiltersLastY = FIL_LIST_TO_START_Y + i * FIL_LIST_PADDING_Y;
       this.drawText(FIL_LIST_START_X, toFiltersLastY, str);
       this.nodeSprites[i].sprite.x = FIL_LIST_START_X + spritePaddingX;
@@ -142,7 +146,7 @@ class FilterWindow extends BaseWindow {
     toFiltersLastY += FIL_LIST_HEADER2_PADDING_Y;
     for (var i = 0; i < fromFilters.length; i++) {
       var currFilter = fromFilters[i];
-      var str = sprintf("%s)[%s]....from %s", ('0000' + ctr++).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
+      var str = sprintf("%s)[%s]....from %s", ('0000' + currFilter.id).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
       this.drawText(FIL_LIST_START_X, toFiltersLastY + i * FIL_LIST_PADDING_Y, str);
       this.nodeSprites[toFilters.length + i].sprite.x = FIL_LIST_START_X + spritePaddingX;
       this.nodeSprites[toFilters.length + i].sprite.y = toFiltersLastY + i * FIL_LIST_PADDING_Y - 13;
@@ -150,12 +154,15 @@ class FilterWindow extends BaseWindow {
   }
 }
 // Center Window - for showing the map
-NUM_NODES = 5000;
+NUM_NODES = 500;
+NODE_SIZE = 16;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     this.gameObjects = [];
     this.generateNodes('seed'); // Let's pretend I use the seed
+    this.callCooldown = 500;
+    this.lastCallMade = Number.MIN_VALUE;
   }
   generateNodes(seed) {
     // Do something with a seed I guess?
@@ -169,13 +176,95 @@ class MapWindow extends BaseWindow {
     ];
     var numNodes = (seed['numNodes'] || NUM_NODES);
     for (var i = 0; i < numNodes; i++) {
-      var node = new Node(Utils.randomInRange(0, this.width - 16), Utils.randomInRange(0, this.height - 16), available_types[Utils.randomInRange(0, available_types.length)]);
+      var node = new Node(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE), available_types[Utils.randomInRange(0, available_types.length)]);
       this.addChild(node.sprite);
+      this.gameObjects.push(node);
       state.gameObjects.push(node);
     }
   }
   execFilter(filters) {
-    console.log(filters);
+    var lookups = {};
+    for (var i = 0; i < filters.length; i++) {
+      var direction = filters[i].direction;
+      var type = filters[i].type;
+      var isSet = filters[i].set;
+      if (!lookups[direction]) {
+        lookups[direction] = {};
+      }
+      lookups[direction][type] = isSet;
+    }
+    for (var i = 0; i < this.gameObjects.length; i++) {
+      var node = this.gameObjects[i];
+      node.setVisible(lookups['to'][node.type] || lookups['from'][node.type]);
+    }
+  }
+  update() {
+    super.update();
+    this.makeCall();
+  }
+  makeCall() {
+    if (this.canMakeCall()) {}
+  }
+  canMakeCall() {
+    var now = Date.now();
+    if (this.lastCallMade + this.callCooldown < now) {
+      var srcIdx = Utils.randomInRange(0, this.gameObjects.length);
+      var dstIdx = Utils.randomInRange(0, this.gameObjects.length);
+      // Make sure you don't add yourself
+      if (srcIdx === dstIdx) {
+        return false;
+      }
+      this.gameObjects[srcIdx].addToPath(this.gameObjects[dstIdx]);
+      this.lastCallMade = now;
+      this.callCooldown = 200 + Utils.randomInRange(100, 1500);
+    }
+  }
+  render() {
+    super.render();
+    var halfSize = 8;
+    var bmd = this.bmp;
+    for (var gIdx = 0; gIdx < this.gameObjects.length; gIdx++) {
+      var node = this.gameObjects[gIdx];
+      if (!node.visible) {
+        continue;
+      }
+      var path = node.path;
+      // Get the starting position (p1)
+      var lastX = node.x + halfSize;
+      var lastY = node.y + halfSize;
+      // Move to the starting position
+      bmd.ctx.beginPath();
+      bmd.ctx.moveTo(lastX, lastY);
+      for (var pIdx = 0; pIdx < path.length; pIdx++) {
+        var target = path[pIdx];
+        bmd.ctx.moveTo(lastX, lastY);
+        // Get the target's positions (p2)
+        var newX = target.x + halfSize;
+        var newY = target.y + halfSize;
+        // fake vector math here (p2 - p1)
+        var tailX = newX - lastX;
+        var tailY = newY - lastY;
+        // (shortX, shortY) is a point short of the target, for multi-color lining
+        var shortPointX = tailX * 0.125;
+        var shortPointY = tailY * 0.125;
+        var shortX = newX - shortPointX;
+        var shortY = newY - shortPointY;
+        bmd.ctx.lineWidth = '1';
+        bmd.ctx.strokeStyle = 'green';
+        bmd.ctx.lineTo(shortX, shortY);
+        bmd.ctx.stroke();
+        bmd.ctx.closePath();
+        bmd.ctx.beginPath();
+        bmd.ctx.lineWidth = '3';
+        bmd.ctx.strokeStyle = 'yellow';
+        bmd.ctx.moveTo(shortX, shortY);
+        bmd.ctx.lineTo(newX, newY);
+        bmd.ctx.stroke();
+        lastX = newX;
+        lastY = newY;
+      }
+      bmd.ctx.closePath();
+    }
   }
 }
 // Right Window - for showing the log
@@ -245,7 +334,7 @@ class CommandWindow extends BaseWindow {
     var command = new Command(cmdStr);
     switch (command.type) {
       case Command.TYPE_FILTER:
-        console.log("Need to make filtering");
+        this.execCmdFilter(command);
         break;
       case Command.TYPE_HELP:
         this.execCmdHelp(command);
@@ -294,5 +383,9 @@ class CommandWindow extends BaseWindow {
     for (var hsIdx = 0; hsIdx < helpStrings.length; hsIdx++) {
       this.pushMessage(helpStrings[hsIdx]);
     }
+  }
+  execCmdFilter(command) {
+    var filterWindow = game.state.getCurrentState().getWindow(BaseWindow.TYPE_FILTER);
+    filterWindow.processFilterCmd(command);
   }
 }
