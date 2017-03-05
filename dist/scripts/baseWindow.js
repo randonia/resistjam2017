@@ -82,16 +82,18 @@ class FilterWindow extends BaseWindow {
     this.filters = [];
     this.nodeSprites = [];
     var availableFilters = Node.getTypes();
+    var toIdCtr = 0;
+    var fromIdCtr = availableFilters.length;
     for (var i = 0; i < availableFilters.length; i++) {
       this.filters.push({
         'set': false,
-        'id': i,
+        'id': toIdCtr++,
         'type': availableFilters[i],
         'direction': 'to'
       });
       this.filters.push({
         'set': false,
-        'id': i,
+        'id': fromIdCtr++,
         'type': availableFilters[i],
         'direction': 'from'
       });
@@ -127,10 +129,9 @@ class FilterWindow extends BaseWindow {
     var toFilters = this.filters.filter(this.filterTo);
     var toFiltersLastY = 0;
     var spritePaddingX = 54;
-    var ctr = 0;
     for (var i = 0; i < toFilters.length; i++) {
       var currFilter = toFilters[i];
-      var str = sprintf("%s)[%s]......to %s", ('0000' + ctr++).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
+      var str = sprintf("%s)[%s]......to %s", ('0000' + currFilter.id).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
       toFiltersLastY = FIL_LIST_TO_START_Y + i * FIL_LIST_PADDING_Y;
       this.drawText(FIL_LIST_START_X, toFiltersLastY, str);
       this.nodeSprites[i].sprite.x = FIL_LIST_START_X + spritePaddingX;
@@ -142,7 +143,7 @@ class FilterWindow extends BaseWindow {
     toFiltersLastY += FIL_LIST_HEADER2_PADDING_Y;
     for (var i = 0; i < fromFilters.length; i++) {
       var currFilter = fromFilters[i];
-      var str = sprintf("%s)[%s]....from %s", ('0000' + ctr++).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
+      var str = sprintf("%s)[%s]....from %s", ('0000' + currFilter.id).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
       this.drawText(FIL_LIST_START_X, toFiltersLastY + i * FIL_LIST_PADDING_Y, str);
       this.nodeSprites[toFilters.length + i].sprite.x = FIL_LIST_START_X + spritePaddingX;
       this.nodeSprites[toFilters.length + i].sprite.y = toFiltersLastY + i * FIL_LIST_PADDING_Y - 13;
