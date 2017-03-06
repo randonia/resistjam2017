@@ -1,15 +1,24 @@
 // Center Window - for showing the map
 NUM_NODES = 500;
+NUM_PEOPLE = 50;
 NODE_SIZE = 16;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     this.gameObjects = [];
-    this.generateNodes('seed'); // Let's pretend I use the seed
+    // this.generateNodes(); // Let's pretend I use the seed
+    this.generatePeople({});
     this.callCooldown = 500;
     this.lastCallMade = Number.MIN_VALUE;
   }
-  generateNodes(seed) {
+  generatePeople(seed) {
+    for (var i = 0; i < (seed['numPeople'] || NUM_PEOPLE); i++) {
+      var person = new Person(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE));
+      this.gameObjects.push(person);
+      this.addChild(person.sprite);
+    }
+  }
+  generateNodes() {
     // Do something with a seed I guess?
     var state = game.state.getCurrentState();
     var available_types = [
@@ -41,10 +50,13 @@ class MapWindow extends BaseWindow {
   }
   update() {
     super.update();
+    for (var i = 0; i < this.gameObjects.length; i++) {
+      this.gameObjects[i].update();
+    }
     this.makeCall();
   }
   makeCall() {
-    if (this.canMakeCall()) {}
+    // if (this.canMakeCall()) {}
   }
   canMakeCall() {
     var now = Date.now();
@@ -105,6 +117,9 @@ class MapWindow extends BaseWindow {
         lastY = newY;
       }
       bmd.ctx.closePath();
+    }
+    for (var i = 0; i < this.gameObjects.length; i++) {
+      this.gameObjects[i].render(bmd.ctx);
     }
   }
 }

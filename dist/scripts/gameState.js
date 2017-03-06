@@ -2,7 +2,7 @@ var DBGWINDOW = undefined;
 class GameState {
   constructor(payload) {}
   preload() {
-    game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 5);
+    game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 8);
   }
   create() {
     this.gameObjects = [];

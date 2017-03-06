@@ -22,15 +22,15 @@ class Node {
   static getFrameFromType(type) {
     switch (type) {
       case Node.TYPE_A:
-        return 1;
+        return 0;
       case Node.TYPE_B:
-        return 2;
+        return 1;
       case Node.TYPE_C:
-        return 3;
+        return 2;
       case Node.TYPE_D:
-        return 4;
+        return 3;
       case Node.TYPE_E:
-        return 5;
+        return 4;
       default:
         return -1;
     }
@@ -45,26 +45,7 @@ class Node {
     this.path = [];
     this.visible = true;
   }
-  update() {
-    if (Math.random() < 0.05) {
-      var dirX = Math.random() - 0.5;
-      var dirY = Math.random() - 0.5;
-      this.x += dirX;
-      this.y += dirY;
-      if (this.x < 0) {
-        this.x += 1;
-      }
-      if (WIN_WIDTH / 2 - NODE_SIZE < this.x) {
-        this.x -= 1;
-      }
-      if (this.y < 0) {
-        this.y += 1;
-      }
-      if (WIN_HEIGHT - WIN_CMDHEIGHT - NODE_SIZE < this.y) {
-        this.y -= 1;
-      }
-    }
-  }
+  update() {}
   render() {
     this.sprite.x = this.x;
     this.sprite.y = this.y;
