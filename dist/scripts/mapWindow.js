@@ -37,22 +37,13 @@ class MapWindow extends BaseWindow {
     }
   }
   execFilter(filters) {
-    var lookups = {};
     for (var i = 0; i < filters.length; i++) {
-      var type = filters[i].type;
-      var isSet = filters[i].set;
-      lookups[type] = isSet;
-    }
-    for (var i = 0; i < gameObjects.length; i++) {
-      var node = gameObjects[i];
-      node.setVisible(lookups[node.type]);
+      var person = gameObjects[i];
+      person.setTracked(filters[i].tracked);
     }
   }
   update() {
     super.update();
-    for (var i = 0; i < gameObjects.length; i++) {
-      gameObjects[i].update();
-    }
     this.makeCall();
   }
   makeCall() {

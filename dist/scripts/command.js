@@ -16,8 +16,8 @@ class Command {
       {
         'type': Command.TYPE_FILTER,
         'name': 'Filter',
-        'commands': ['filter', 'f'],
-        'helpStrings': ['Use to toggle filters.', 'Usage: $ filter ID', 'ID - The numerical ID on the left side of the filter menu', 'Usage: $ filter a - Re-enables every subject', 'Usage: $ filter n - disables every subject']
+        'commands': ['track', 't'],
+        'helpStrings': ['Use to toggle tracking.', 'Usage: $ track ID', 'ID - The numerical ID on the left side of the track menu', 'Usage: $ track a - Re-enables every subject', 'Usage: $ track n - disables every subject']
       }
     ]
   }

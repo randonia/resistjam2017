@@ -1,70 +1,70 @@
 // Left hand window - for filtering
-FIL_LIST_TITLE_Y = 25;
-FIL_LIST_HEADER_PADDING = 25;
-FIL_LIST_HEADER_Y = FIL_LIST_TITLE_Y + 30;
+FIL_ITEMS_STARTING_Y = 25;
+FIL_LIST_HEADER_PADDING = 0;
 FIL_LIST_START_X = 5;
-FIL_LIST_START_Y = FIL_LIST_HEADER_Y + FIL_LIST_HEADER_PADDING;
-FIL_LIST_PADDING_Y = 20;
+FIL_LIST_PADDING_Y = 12;
 FIL_LIST_HEADER2_PADDING_Y = 25;
 class FilterWindow extends BaseWindow {
   constructor() {
-    super(0, 0, WIN_WIDTH / 4, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_FILTER);
+    super(0, 25, WIN_WIDTH / 4, WIN_HEIGHT - WIN_CMDHEIGHT - 25, BaseWindow.TYPE_FILTER);
     this.initFilters();
+    this.itemListY = FIL_ITEMS_STARTING_Y;
   }
   initFilters() {
     this.filters = [];
-    this.nodeSprites = [];
-    var availableFilters = Node.getTypes();
+    this.personSprites = [];
     var idCtr = 1;
-    for (var i = 0; i < availableFilters.length; i++) {
+    for (var i = 0; i < gameObjects.length; i++) {
       this.filters.push({
-        'set': true,
-        'id': idCtr++,
-        'type': availableFilters[i]
+        'tracked': false,
+        'filter_id': idCtr++,
+        'id': gameObjects[i].name
       });
+      var personSprite = game.add.sprite(0, 0, 'nodes');
+      personSprite.frame = gameObjects[i].sprite.frame;
+      this.personSprites.push(personSprite);
     }
-    // Initialize the node sprites
-    for (var idxAF = 0; idxAF < availableFilters.length; idxAF++) {
-      this.nodeSprites.push(new Node(0, 0, availableFilters[idxAF]));
-    }
+  }
+  onPageUp(event) {
+    this.itemListY = Utils.clamp(-(gameObjects.length - 30) * FIL_LIST_PADDING_Y, FIL_ITEMS_STARTING_Y, this.itemListY + FIL_LIST_PADDING_Y * 5);
+  }
+  onPageDown(event) {
+    this.itemListY = Utils.clamp(-(gameObjects.length - 30) * FIL_LIST_PADDING_Y, FIL_ITEMS_STARTING_Y, this.itemListY - FIL_LIST_PADDING_Y * 5);
   }
   processFilterCmd(filterCmd) {
     var filterArg = filterCmd.getArg(0);
     for (var i = 0; i < this.filters.length; i++) {
       if (filterArg.toLowerCase() === 'a') {
-        this.filters[i].set = true;
+        this.filters[i].tracked = true;
         continue;
       }
       if (filterArg.toLowerCase() === 'n') {
-        this.filters[i].set = false;
+        this.filters[i].tracked = false;
         continue;
       }
-      if (this.filters[i].id == filterArg) {
-        this.filters[i].set = !this.filters[i].set;
+      if (this.filters[i].filter_id == filterArg) {
+        this.filters[i].tracked = !this.filters[i].tracked;
       }
     }
     this.resetFilter();
   }
   resetFilter() {
-    var state = game.state.getCurrentState();
-    var mapWindow = state.getWindow(BaseWindow.TYPE_MAP);
     mapWindow.execFilter(this.filters);
   }
   render() {
     super.render();
-    this.drawText(this.width * 0.5, FIL_LIST_TITLE_Y, 'MAP FILTERS', undefined, 'center');
-    this.drawText(FIL_LIST_START_X, FIL_LIST_HEADER_Y, 'Filter To');
     var filters = this.filters
-    var filtersLastY = 0;
-    var spritePaddingX = 54;
+    var itemListY = this.itemListY;
+    var spritePaddingX = 45;
     for (var i = 0; i < filters.length; i++) {
       var currFilter = filters[i];
-      var str = sprintf("%s)[%s]......to %s", ('0000' + currFilter.id).slice(-2), (currFilter.set ? 'X' : ' '), currFilter.type);
-      filtersLastY = FIL_LIST_START_Y + i * FIL_LIST_PADDING_Y;
-      this.drawText(FIL_LIST_START_X, filtersLastY, str);
-      this.nodeSprites[i].sprite.x = FIL_LIST_START_X + spritePaddingX;
-      this.nodeSprites[i].sprite.y = FIL_LIST_START_Y + i * FIL_LIST_PADDING_Y - 13;
+      var str = sprintf("%s)[%s].....%s", ('0000' + currFilter.filter_id).slice(-2), (currFilter.tracked ? 'X' : ' '), currFilter.id);
+      this.drawText(FIL_LIST_START_X, this.itemListY + i * FIL_LIST_PADDING_Y, str, 12, undefined, 'red');
+      this.personSprites[i].x = FIL_LIST_START_X + spritePaddingX;
+      this.personSprites[i].y = this.itemListY + (i + 1) * FIL_LIST_PADDING_Y;
     }
-    filtersLastY += FIL_LIST_PADDING_Y + FIL_LIST_HEADER2_PADDING_Y;
+    // Some helpful text
+    this.drawText(this.width - 40, 15, '[PgUp]', 12);
+    this.drawText(this.width - 40, this.height - 10, '[PgDn]', 12);
   }
 }

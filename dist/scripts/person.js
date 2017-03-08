@@ -20,6 +20,18 @@ class Person {
     this.moveDelay = 500;
     this.lastMove = Number.MIN_VALUE;
     this.selected = false;
+    this.visible = true;
+    this.tracked = false;
+  }
+  canMove() {
+    return this.lastMove + this.moveDelay < Date.now();
+  }
+  setVisible(val) {
+    this.visible = val;
+    this.sprite.visible = val;
+  }
+  setTracked(val) {
+    this.tracked = val;
   }
   update() {
     var now = Date.now();
@@ -54,18 +66,16 @@ class Person {
       }
     }
   }
-  canMove() {
-    return this.lastMove + this.moveDelay < Date.now();
-  }
   render() {
+    if (!this.visible) {
+      return;
+    }
     var ctx = mapWindow.bmp.ctx;
-    this.sprite.x = this._x;
-    this.sprite.y = this._y;
     var textX = (this.X < WIN_WIDTH / 2 - 65) ? this.X + 8 : this.X - 55;
     ctx.font = sprintf("%spx %s", 11, DEFAULT_FONT);
     ctx.strokeStyle = 'black';
     ctx.strokeText(this.name, textX, this.Y);
-    ctx.fillStyle = (this.selected) ? 'red' : 'gray';
+    ctx.fillStyle = (this.tracked) ? 'red' : 'gray';
     ctx.fillText(this.name, textX, this.Y);
     if (this.target) {
       ctx.beginPath();

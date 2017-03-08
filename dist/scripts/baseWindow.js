@@ -17,6 +17,9 @@ class BaseWindow {
   static get TYPE_COMMAND() {
     return 'window_command';
   }
+  static get TYPE_HEADER() {
+    return 'HEADER';
+  }
   constructor(x, y, width, height, type = undefined) {
     this.width = width;
     this.height = height;
@@ -64,4 +67,6 @@ class BaseWindow {
   onDownCallback(event) {} // Empty event default
   onBackspace(event) {} // Empty event default
   onEnter(event) {} // Empty event default
+  onPageUp(event) {} //
+  onPageDown(event) {} //
 }

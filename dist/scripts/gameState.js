@@ -23,13 +23,27 @@ class GameState {
     this.currentWindowIndex = 0;
     // This ensures the mapwindow is the lowest order
     mapWindow = new MapWindow();
+    // Man this is janky. Javascript you freaky.
+    var filterHeader = new BaseWindow(0, 0, WIN_WIDTH / 4, 25, BaseWindow.TYPE_HEADER);
+    filterHeader.render = function() {
+      var bmd = this.bmp;
+      bmd.clear();
+      bmd.ctx.lineWidth = '2';
+      bmd.ctx.strokeStyle = (this.selected) ? 'green' : '#535f53';
+      bmd.ctx.fillStyle = '#111';
+      bmd.ctx.fillRect(0, 0, this.width, this.height);
+      bmd.ctx.strokeRect(0, 0, this.width, this.height);
+      this.drawText(this.width * 0.5, 18, 'TRACKING', undefined, 'center');
+    }
     filterWindow = new FilterWindow();
     logWindow = new LogWindow();
     commandWindow = new CommandWindow();
     this.windowStack.push(filterWindow);
+    this.windowStack.push(filterHeader);
     this.windowStack.push(mapWindow);
     this.windowStack.push(logWindow);
     this.windowStack.push(commandWindow);
+    filterHeader.sprite.bringToTop();
   }
   initKeyboardHandlers() {
     this.keys = {};
@@ -50,6 +64,18 @@ class GameState {
     this.game.input.keyboard.onPressCallback = function(event) {
       state.onDownCallback(event, this);
     };
+    var keyPageUp = game.input.keyboard.addKey(Phaser.Keyboard.PAGE_UP);
+    keyPageUp.onDown.add(this.onPageUp, this);
+    this.keys['pageUp'] = keyPageUp;
+    var keyPageDown = game.input.keyboard.addKey(Phaser.Keyboard.PAGE_DOWN);
+    keyPageDown.onDown.add(this.onPageDown, this);
+    this.keys['pageDown'] = keyPageDown;
+  }
+  onPageUp(event) {
+    this._submitEvent('onPageUp', event);
+  }
+  onPageDown(event) {
+    this._submitEvent('onPageDown', event);
   }
   onTabKey(event) {
     this._submitEvent('onTabKey', event);
