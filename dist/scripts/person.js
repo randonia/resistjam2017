@@ -13,7 +13,7 @@ class Person {
     this._x = x;
     this._y = y;
     this.name = Person.generateName();
-    this.path = [];
+    this.path = new TrackedPath(this);
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = (Math.random() < 0.25) ? 4 : (Math.random() < 0.5) ? 5 : (Math.random() < 0.75) ? 6 : 7;
     this.target = undefined;

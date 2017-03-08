@@ -20,7 +20,7 @@ class LogWindow extends BaseWindow {
     }
   }
   constructor() {
-    super(3 * WIN_WIDTH / 4, 0, WIN_WIDTH / 4, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_LOG);
+    super(WINDOW_FILTER_WIDTH + WINDOW_MAP_WIDTH, 0, WINDOW_LOG_WIDTH, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_LOG);
     this.logs = [];
     this.lastAdd = Date.now();
   }

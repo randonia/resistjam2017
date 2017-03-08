@@ -1,8 +1,6 @@
 // Window Consts
 DEFAULT_FONTSIZE = 16;
 DEFAULT_FONT = 'Anonymous Pro, monospace';
-WIN_WIDTH = 800;
-WIN_HEIGHT = 600;
 WIN_CMDHEIGHT = 100;
 class BaseWindow {
   static get TYPE_FILTER() {

@@ -1,12 +1,12 @@
 // Left hand window - for filtering
-FIL_ITEMS_STARTING_Y = 25;
+FIL_ITEMS_STARTING_Y = 20;
 FIL_LIST_HEADER_PADDING = 0;
 FIL_LIST_START_X = 5;
 FIL_LIST_PADDING_Y = 12;
 FIL_LIST_HEADER2_PADDING_Y = 25;
 class FilterWindow extends BaseWindow {
   constructor() {
-    super(0, 25, WIN_WIDTH / 4, WIN_HEIGHT - WIN_CMDHEIGHT - 25, BaseWindow.TYPE_FILTER);
+    super(0, 25, WINDOW_FILTER_WIDTH, WIN_HEIGHT - WIN_CMDHEIGHT - 25, BaseWindow.TYPE_FILTER);
     this.initFilters();
     this.itemListY = FIL_ITEMS_STARTING_Y;
   }

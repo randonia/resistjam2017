@@ -8,7 +8,7 @@ roundTarget = undefined;
 suspects = [];
 class MapWindow extends BaseWindow {
   constructor() {
-    super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
+    super(WINDOW_FILTER_WIDTH, 0, WINDOW_MAP_WIDTH, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     gameObjects = [];
     this.generatePeople({});
     this.setupRound();
@@ -85,7 +85,7 @@ class MapWindow extends BaseWindow {
     }
   }
   makeCall() {
-    // if (this.canMakeCall()) {}
+    if (this.canMakeCall()) {}
   }
   canMakeCall() {
     var now = Date.now();
@@ -96,7 +96,16 @@ class MapWindow extends BaseWindow {
       if (srcIdx === dstIdx) {
         return false;
       }
-      gameObjects[srcIdx].addToPath(gameObjects[dstIdx]);
+      gameObjects[srcIdx].path.addConnection(gameObjects[dstIdx]);
+      var mode = LogWindow.MODE_MSG;
+      var suspectNames = suspects.map(function(item) {
+        return item.name;
+      });
+      var message = sprintf('%s>>>link>>>%s', gameObjects[srcIdx].name, gameObjects[dstIdx].name);
+      if (suspectNames.indexOf(gameObjects[srcIdx].name) != -1) {
+        mode = LogWindow.MODE_WARN;
+      }
+      logWindow.msg(message, mode);
       this.lastCallMade = now;
       this.callCooldown = 200 + Utils.randomInRange(100, 1500);
     }
@@ -107,22 +116,22 @@ class MapWindow extends BaseWindow {
     var bmd = this.bmp;
     for (var gIdx = 0; gIdx < gameObjects.length; gIdx++) {
       var node = gameObjects[gIdx];
-      if (!node.visible) {
+      if (!node.visible || !node.tracked) {
         continue;
       }
-      var path = node.path;
+      var path = node.path.connections;
       // Get the starting position (p1)
-      var lastX = node.x + halfSize;
-      var lastY = node.y + halfSize;
+      var lastX = node.X;
+      var lastY = node.Y;
       // Move to the starting position
       bmd.ctx.beginPath();
       bmd.ctx.moveTo(lastX, lastY);
       for (var pIdx = 0; pIdx < path.length; pIdx++) {
-        var target = path[pIdx];
+        var target = path[pIdx].link;
         bmd.ctx.moveTo(lastX, lastY);
         // Get the target's positions (p2)
-        var newX = target.x + halfSize;
-        var newY = target.y + halfSize;
+        var newX = target.X;
+        var newY = target.Y;
         // fake vector math here (p2 - p1)
         var tailX = newX - lastX;
         var tailY = newY - lastY;
@@ -142,8 +151,8 @@ class MapWindow extends BaseWindow {
         bmd.ctx.moveTo(shortX, shortY);
         bmd.ctx.lineTo(newX, newY);
         bmd.ctx.stroke();
-        lastX = newX;
-        lastY = newY;
+        lastX = node.X;
+        lastY = node.Y;
       }
       bmd.ctx.closePath();
     }

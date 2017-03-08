@@ -4,6 +4,11 @@ filterWindow = undefined;
 commandWindow = undefined;
 logWindow = undefined;
 mapWindow = undefined;
+WIN_WIDTH = 800;
+WIN_HEIGHT = 600;
+WINDOW_FILTER_WIDTH = WIN_WIDTH * 0.23;
+WINDOW_MAP_WIDTH = WIN_WIDTH * 0.5;
+WINDOW_LOG_WIDTH = WIN_WIDTH - WINDOW_FILTER_WIDTH - WINDOW_MAP_WIDTH;
 gameObjects = []
 class GameState {
   constructor(payload) {}
@@ -24,7 +29,7 @@ class GameState {
     // This ensures the mapwindow is the lowest order
     mapWindow = new MapWindow();
     // Man this is janky. Javascript you freaky.
-    var filterHeader = new BaseWindow(0, 0, WIN_WIDTH / 4, 25, BaseWindow.TYPE_HEADER);
+    var filterHeader = new BaseWindow(0, 0, WINDOW_FILTER_WIDTH, 25, BaseWindow.TYPE_HEADER);
     filterHeader.render = function() {
       var bmd = this.bmp;
       bmd.clear();
