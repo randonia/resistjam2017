@@ -1,10 +1,21 @@
 NAME_LETTERS = ['​‌A', '​‌B', '​‌C', '​‌Ć', '​‌Č', '​‌D', '​‌Đ', '​‌E', '​‌F', '​‌G', '​‌H', '​‌I', '​‌J', '​‌K', '​‌L', '​‌M', '​‌N', '​‌O', '​‌P', '​‌Q', '​‌R', '​‌S', '​‌Š', '​‌T', '​‌U', '​‌V', '​‌W', '​‌X', '​‌Y', '​‌Z', '​‌Ž', '​‌А', '​‌Б', '​‌В', '​‌Г', '​‌Д', '​‌Е', '​‌Ё', '​‌Ж', '​‌З', '​‌И', '​‌Й', '​‌К', '​‌Л', '​‌М', '​‌Н', '​‌О', '​‌П', '​‌Р', '​‌С', '​‌Т', '​‌У', '​‌Ф', '​‌Х', '​‌Ц', '​‌Ч', '​‌Ш', '​‌Щ', '​‌Ъ', '​‌Ы', '​‌Ь', '​‌Э', '​‌Ю', '​‌Я', '​‌а', '​‌б', '​‌в', '​‌г', '​‌д', '​‌е', '​‌ё', '​‌ж', '​‌з', '​‌и', '​‌й', '​‌к', '​‌л', '​‌м', '​‌н', '​‌о', '​‌п', '​‌р', '​‌с', '​‌т', '​‌у', '​‌ф', '​‌х', '​‌ц', '​‌ч', '​‌ш', '​‌щ', '​‌ъ', '​‌ы', '​‌ь', '​‌э', '​‌ю', '​‌я', '​‌Α', '​‌Β', '​‌Γ', '​‌Δ', '​‌Ε', '​‌Ζ', '​‌Η', '​‌Θ', '​‌Ι', '​‌Κ', '​‌Λ', '​‌Μ', '​‌Ν', '​‌Ξ', '​‌Ο', '​‌Π', '​‌Ρ', '​‌Σ', '​‌Τ', '​‌Υ', '​‌Φ', '​‌Χ', '​‌Ψ', '​‌Ω', '​‌α', '​‌β', '​‌γ', '​‌δ', '​‌ε', '​‌ζ', '​‌η', '​‌θ', '​‌ι', '​‌κ', '​‌λ', '​‌μ', '​‌ν', '​‌ξ', '​‌ο', '​‌π', '​‌ρ', '​‌σ', '​‌τ', '​‌υ', '​‌φ', '​‌χ', '​‌ψ', '​‌ω'];
+idPool = {}
 class Person {
   static generateName() {
-    return sprintf('%s-%s[%s]', Person.randomLetter(), Person.randomLetter(), Person.randomNumber());
+    return sprintf('%s.%s%s', Person.randomLetter(), Person.randomLetter(), Person.randomLetter());
   }
   static randomLetter() {
     return NAME_LETTERS[Utils.randomInRange(0, NAME_LETTERS.length)];
+  }
+  static generateID() {
+    var newId = undefined;
+    do {
+      newId = sprintf('%s.%s', Utils.randomInRange(10, 99), Utils.randomInRange(100, 999));
+      if (!idPool[newId]) {
+        idPool[newId] = 1;
+      }
+    } while (!idPool[newId])
+    return newId;
   }
   static randomNumber() {
     return Utils.randomInRange(100, 999);
@@ -13,6 +24,7 @@ class Person {
     this._x = x;
     this._y = y;
     this.name = Person.generateName();
+    this.id = Person.generateID();
     this.path = new TrackedPath(this);
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = (Math.random() < 0.25) ? 4 : (Math.random() < 0.5) ? 5 : (Math.random() < 0.75) ? 6 : 7;

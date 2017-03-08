@@ -99,10 +99,10 @@ class MapWindow extends BaseWindow {
       gameObjects[srcIdx].path.addConnection(gameObjects[dstIdx]);
       var mode = LogWindow.MODE_MSG;
       var suspectNames = suspects.map(function(item) {
-        return item.name;
+        return item.id;
       });
-      var message = sprintf('%s>>>link>>>%s', gameObjects[srcIdx].name, gameObjects[dstIdx].name);
-      if (suspectNames.indexOf(gameObjects[srcIdx].name) != -1) {
+      var message = sprintf('%s>>>link>>>%s', gameObjects[srcIdx].id, gameObjects[dstIdx].id);
+      if (suspectNames.indexOf(gameObjects[srcIdx].id) != -1) {
         mode = LogWindow.MODE_WARN;
       }
       logWindow.msg(message, mode);
