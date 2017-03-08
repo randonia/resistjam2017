@@ -65,6 +65,8 @@ class Person {
         }
       }
     }
+    this.sprite.x = this._x;
+    this.sprite.y = this._y;
   }
   render() {
     if (!this.visible) {
