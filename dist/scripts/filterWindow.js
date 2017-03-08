@@ -17,7 +17,7 @@ class FilterWindow extends BaseWindow {
     for (var i = 0; i < gameObjects.length; i++) {
       this.filters.push({
         'tracked': false,
-        'filter_id': idCtr++,
+        'filterId': idCtr++,
         'id': gameObjects[i].name
       });
       var personSprite = game.add.sprite(0, 0, 'nodes');
@@ -42,7 +42,7 @@ class FilterWindow extends BaseWindow {
         this.filters[i].tracked = false;
         continue;
       }
-      if (this.filters[i].filter_id == filterArg) {
+      if (this.filters[i].filterId == filterArg) {
         this.filters[i].tracked = !this.filters[i].tracked;
       }
     }
@@ -51,6 +51,24 @@ class FilterWindow extends BaseWindow {
   resetFilter() {
     mapWindow.execFilter(this.filters);
   }
+  getGameObjectByFilterId(filterId) {
+    for (var i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].filterId === filterId) {
+        return gameObjects[i];
+      }
+    }
+    return undefined;
+  }
+  setFilterStatusByGameObjectId(id) {
+    for (var i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].id === id) {
+        this.filters[i].tracked = true;
+        this.resetFilter();
+        return gameObjects[i];
+      }
+    }
+    return undefined;
+  }
   render() {
     super.render();
     var filters = this.filters
@@ -58,8 +76,8 @@ class FilterWindow extends BaseWindow {
     var spritePaddingX = 45;
     for (var i = 0; i < filters.length; i++) {
       var currFilter = filters[i];
-      var str = sprintf("%s)[%s].....%s", ('0000' + currFilter.filter_id).slice(-2), (currFilter.tracked ? 'X' : ' '), currFilter.id);
-      this.drawText(FIL_LIST_START_X, this.itemListY + i * FIL_LIST_PADDING_Y, str, 12, undefined, 'red');
+      var str = sprintf("%s)[%s].....%s", ('0000' + currFilter.filterId).slice(-2), (currFilter.tracked ? 'X' : ' '), currFilter.id);
+      this.drawText(FIL_LIST_START_X, this.itemListY + i * FIL_LIST_PADDING_Y, str, 12, undefined, 'green');
       this.personSprites[i].x = FIL_LIST_START_X + spritePaddingX;
       this.personSprites[i].y = this.itemListY + (i + 1) * FIL_LIST_PADDING_Y;
     }

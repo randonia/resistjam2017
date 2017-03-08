@@ -49,13 +49,13 @@ class BaseWindow {
   addChild(sprite) {
     this.sprite.addChild(sprite);
   }
-  drawText(x, y, message, size = undefined, align = undefined) {
+  drawText(x, y, message, size = undefined, align = undefined, color = undefined) {
     var bmd = this.bmp;
     bmd.ctx.font = sprintf("%spx %s", (size || DEFAULT_FONTSIZE), DEFAULT_FONT);
     bmd.ctx.textAlign = align || 'start';
     bmd.ctx.fillStyle = 'black';
     bmd.ctx.fillText(message, x + 1, y + 1);
-    bmd.ctx.fillStyle = 'green';
+    bmd.ctx.fillStyle = color || 'green';
     bmd.ctx.fillText(message, x, y);
   }
   fillRect(x, y, width, height, color = 'green') {

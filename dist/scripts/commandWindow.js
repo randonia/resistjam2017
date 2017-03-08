@@ -56,6 +56,20 @@ class CommandWindow extends BaseWindow {
       case Command.TYPE_HELP:
         this.execCmdHelp(command);
         break;
+      case Command.TYPE_SCAN:
+        this.execCmdScan(command);
+        break;
+    }
+  }
+  execCmdScan(command) {
+    console.log(command);
+    var targetId = Number(command.getArg(0));
+    if (!targetId || isNaN(targetId)) {
+      this.pushMessage('Invalid scan usage. See help by typing:');
+      this.pushMessage('help scan');
+    } else {
+      var target = filterWindow.getGameObjectByFilterId(targetId);
+      mapWindow.scanTarget(target);
     }
   }
   execCmdHelp(command) {
@@ -102,7 +116,6 @@ class CommandWindow extends BaseWindow {
     }
   }
   execCmdFilter(command) {
-    var filterWindow = game.state.getCurrentState().getWindow(BaseWindow.TYPE_FILTER);
     filterWindow.processFilterCmd(command);
   }
 }

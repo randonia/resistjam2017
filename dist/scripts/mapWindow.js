@@ -1,15 +1,20 @@
 // Center Window - for showing the map
 NUM_NODES = 500;
 NUM_PEOPLE = 50;
+NUM_SUSPECTS = 15;
 NODE_SIZE = 16;
+SCAN_DURATION = 4000;
+roundTarget = undefined;
+suspects = [];
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     gameObjects = [];
-    // this.generateNodes(); // Let's pretend I use the seed
     this.generatePeople({});
+    this.setupRound();
     this.callCooldown = 500;
     this.lastCallMade = Number.MIN_VALUE;
+    this.scannedTargets = {};
   }
   generatePeople(seed) {
     for (var i = 0; i < (seed['numPeople'] || NUM_PEOPLE); i++) {
@@ -18,22 +23,28 @@ class MapWindow extends BaseWindow {
       this.addChild(person.sprite);
     }
   }
-  generateNodes() {
-    // Do something with a seed I guess?
-    var state = game.state.getCurrentState();
-    var available_types = [
-    Node.TYPE_A,
-    Node.TYPE_B,
-    Node.TYPE_C,
-    Node.TYPE_D,
-    Node.TYPE_E,
-    ];
-    var numNodes = (seed['numNodes'] || NUM_NODES);
-    for (var i = 0; i < numNodes; i++) {
-      var node = new Node(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE), available_types[Utils.randomInRange(0, available_types.length)]);
-      this.addChild(node.sprite);
-      gameObjects.push(node);
-      state.gameObjects.push(node);
+  setupRound() {
+    this.targetIndex = Utils.randomInRange(0, gameObjects.length);
+    roundTarget = gameObjects[this.targetIndex];
+    var suspectIdxs = {}
+    do {
+      var newIdx = Utils.randomInRange(0, gameObjects.length);
+      if (newIdx == this.targetIndex || suspectIdxs[newIdx]) {
+        continue;
+      }
+      var newSuspect = gameObjects[newIdx];
+      suspectIdxs[newIdx] = newSuspect;
+      suspects.push(newSuspect);
+    } while (suspects.length < NUM_SUSPECTS)
+  }
+  scanTarget(targetObj) {
+    // See if we're already scanning
+    if (this.scannedTargets[targetObj.name]) {
+      return;
+    }
+    logWindow.msg(sprintf('Beginning scan of %s', targetObj.name));
+    this.scannedTargets[targetObj.name] = {
+      'startTime': Date.now()
     }
   }
   execFilter(filters) {
@@ -44,7 +55,34 @@ class MapWindow extends BaseWindow {
   }
   update() {
     super.update();
+    this.processScannedUnits();
     this.makeCall();
+  }
+  processScannedUnits() {
+    for (var scanId in this.scannedTargets) {
+      var targetData = this.scannedTargets[scanId];
+      // Finish if we're done scanning
+      if (targetData.startTime + SCAN_DURATION < Date.now()) {
+        // Process the results
+        var success = false;
+        for (var i = 0; i < suspects.length; i++) {
+          var suspect = suspects[i];
+          if (suspect.name === scanId) {
+            success = true;
+            break;
+          }
+        }
+        if (success) {
+          logWindow.msg(sprintf('SUSPECT FOUND %s', scanId), LogWindow.MODE_WARN);
+          var suspect = filterWindow.setFilterStatusByGameObjectId(scanId);
+        } else {
+          logWindow.msg(sprintf('No records found %s', scanId));
+        }
+        // Remove them from the list
+        delete this.scannedTargets[scanId];
+      }
+      // Otherwise keep going
+    }
   }
   makeCall() {
     // if (this.canMakeCall()) {}
