@@ -5,7 +5,7 @@ NODE_SIZE = 16;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WIN_WIDTH / 4, 0, WIN_WIDTH / 2, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
-    this.gameObjects = [];
+    gameObjects = [];
     // this.generateNodes(); // Let's pretend I use the seed
     this.generatePeople({});
     this.callCooldown = 500;
@@ -14,7 +14,7 @@ class MapWindow extends BaseWindow {
   generatePeople(seed) {
     for (var i = 0; i < (seed['numPeople'] || NUM_PEOPLE); i++) {
       var person = new Person(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE));
-      this.gameObjects.push(person);
+      gameObjects.push(person);
       this.addChild(person.sprite);
     }
   }
@@ -32,7 +32,7 @@ class MapWindow extends BaseWindow {
     for (var i = 0; i < numNodes; i++) {
       var node = new Node(Utils.randomInRange(0, this.width - NODE_SIZE), Utils.randomInRange(0, this.height - NODE_SIZE), available_types[Utils.randomInRange(0, available_types.length)]);
       this.addChild(node.sprite);
-      this.gameObjects.push(node);
+      gameObjects.push(node);
       state.gameObjects.push(node);
     }
   }
@@ -43,15 +43,15 @@ class MapWindow extends BaseWindow {
       var isSet = filters[i].set;
       lookups[type] = isSet;
     }
-    for (var i = 0; i < this.gameObjects.length; i++) {
-      var node = this.gameObjects[i];
+    for (var i = 0; i < gameObjects.length; i++) {
+      var node = gameObjects[i];
       node.setVisible(lookups[node.type]);
     }
   }
   update() {
     super.update();
-    for (var i = 0; i < this.gameObjects.length; i++) {
-      this.gameObjects[i].update();
+    for (var i = 0; i < gameObjects.length; i++) {
+      gameObjects[i].update();
     }
     this.makeCall();
   }
@@ -61,13 +61,13 @@ class MapWindow extends BaseWindow {
   canMakeCall() {
     var now = Date.now();
     if (this.lastCallMade + this.callCooldown < now) {
-      var srcIdx = Utils.randomInRange(0, this.gameObjects.length);
-      var dstIdx = Utils.randomInRange(0, this.gameObjects.length);
+      var srcIdx = Utils.randomInRange(0, gameObjects.length);
+      var dstIdx = Utils.randomInRange(0, gameObjects.length);
       // Make sure you don't add yourself
       if (srcIdx === dstIdx) {
         return false;
       }
-      this.gameObjects[srcIdx].addToPath(this.gameObjects[dstIdx]);
+      gameObjects[srcIdx].addToPath(gameObjects[dstIdx]);
       this.lastCallMade = now;
       this.callCooldown = 200 + Utils.randomInRange(100, 1500);
     }
@@ -76,8 +76,8 @@ class MapWindow extends BaseWindow {
     super.render();
     var halfSize = 8;
     var bmd = this.bmp;
-    for (var gIdx = 0; gIdx < this.gameObjects.length; gIdx++) {
-      var node = this.gameObjects[gIdx];
+    for (var gIdx = 0; gIdx < gameObjects.length; gIdx++) {
+      var node = gameObjects[gIdx];
       if (!node.visible) {
         continue;
       }
@@ -118,8 +118,8 @@ class MapWindow extends BaseWindow {
       }
       bmd.ctx.closePath();
     }
-    for (var i = 0; i < this.gameObjects.length; i++) {
-      this.gameObjects[i].render(bmd.ctx);
+    for (var i = 0; i < gameObjects.length; i++) {
+      gameObjects[i].render(bmd.ctx);
     }
   }
 }

@@ -57,7 +57,8 @@ class Person {
   canMove() {
     return this.lastMove + this.moveDelay < Date.now();
   }
-  render(ctx) {
+  render() {
+    var ctx = mapWindow.bmp.ctx;
     this.sprite.x = this._x;
     this.sprite.y = this._y;
     var textX = (this.X < WIN_WIDTH / 2 - 65) ? this.X + 8 : this.X - 55;

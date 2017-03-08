@@ -1,11 +1,16 @@
 var DBGWINDOW = undefined;
+// Yolojam
+filterWindow = undefined;
+commandWindow = undefined;
+logWindow = undefined;
+mapWindow = undefined;
+gameObjects = []
 class GameState {
   constructor(payload) {}
   preload() {
     game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 8);
   }
   create() {
-    this.gameObjects = [];
     this.windowStack = [];
     // Create the three window panels
     this.initWindowStack();
@@ -17,12 +22,14 @@ class GameState {
   initWindowStack() {
     this.currentWindowIndex = 0;
     // This ensures the mapwindow is the lowest order
-    var mapWindow = new MapWindow();
-    DBGWINDOW = mapWindow;
-    this.windowStack.push(new FilterWindow());
+    mapWindow = new MapWindow();
+    filterWindow = new FilterWindow();
+    logWindow = new LogWindow();
+    commandWindow = new CommandWindow();
+    this.windowStack.push(filterWindow);
     this.windowStack.push(mapWindow);
-    this.windowStack.push(new LogWindow());
-    this.windowStack.push(new CommandWindow());
+    this.windowStack.push(logWindow);
+    this.windowStack.push(commandWindow);
   }
   initKeyboardHandlers() {
     this.keys = {};
@@ -114,16 +121,16 @@ class GameState {
     for (var i = 0; i < this.windowStack.length; i++) {
       this.windowStack[i].update();
     }
-    for (var i = this.gameObjects.length - 1; i >= 0; i--) {
-      this.gameObjects[i].update();
+    for (var i = gameObjects.length - 1; i >= 0; i--) {
+      gameObjects[i].update();
     }
   }
   render() {
     for (var i = this.windowStack.length - 1; i >= 0; i--) {
       this.windowStack[i].render();
     }
-    for (var i = this.gameObjects.length - 1; i >= 0; i--) {
-      this.gameObjects[i].render();
+    for (var i = gameObjects.length - 1; i >= 0; i--) {
+      gameObjects[i].render();
     }
     this.scanlineFilter.update(game.input.mousePointer);
   }
