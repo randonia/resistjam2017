@@ -68,6 +68,10 @@ class CommandWindow extends BaseWindow {
       this.pushMessage('help scan');
     } else {
       var target = filterWindow.getGameObjectByFilterId(targetId);
+      if (!target) {
+        this.pushMessage(sprintf('Invalid scan ID - ID [%s] not found', targetId));
+        return;
+      }
       mapWindow.scanTarget(target);
     }
   }
