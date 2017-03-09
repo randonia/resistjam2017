@@ -1,3 +1,4 @@
+APPREHENDED_SUSPECT = undefined;
 class Police {
   get X() {
     return this._x + 8;
@@ -21,6 +22,14 @@ class Police {
     var dY = this.target.Y - this.Y;
     if (Math.abs(dX) < 4 && Math.abs(dY) < 4) {
       // End the game
+      APPREHENDED_SUSPECT = this.target;
+      if (roundTarget.id == this.target.id) {
+        // Win
+        game.state.start('win');
+      } else {
+        // Lose
+        game.state.start('lose');
+      }
     } else {
       if (Math.abs(dX) < Math.abs(dY)) {
         this._y += (0 < dY) ? 1 : -1;

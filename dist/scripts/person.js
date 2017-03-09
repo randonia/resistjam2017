@@ -29,7 +29,7 @@ class Person {
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = (Math.random() < 0.25) ? 4 : (Math.random() < 0.5) ? 5 : (Math.random() < 0.75) ? 6 : 7;
     this.target = undefined;
-    this.moveDelay = 500;
+    this.moveDelay = (DEBUG) ? 50 : 500;
     this.lastMove = Number.MIN_VALUE;
     this.selected = false;
     this.visible = true;
@@ -57,12 +57,17 @@ class Person {
     if (this.target && this.canMove()) {
       var dX = this.target.X - this.X;
       var dY = this.target.Y - this.Y;
-      if (Math.abs(dX) < Math.abs(dY)) {
-        this._y += (0 < dY) ? 1 : -1;
+      // Test for loss condition
+      if (this.target.id == roundTarget.id && Math.abs(dX) < 8 && Math.abs(dY) < 8) {
+        game.state.start('lose');
       } else {
-        this._x += (0 < dX) ? 1 : -1;
+        if (Math.abs(dX) < Math.abs(dY)) {
+          this._y += (0 < dY) ? 1 : -1;
+        } else {
+          this._x += (0 < dX) ? 1 : -1;
+        }
+        this.lastMove = now;
       }
-      this.lastMove = now;
     } else {
       if (Math.random() < 0.05) {
         var dirX = Math.random() - 0.5;
