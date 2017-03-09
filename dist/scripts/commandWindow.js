@@ -59,6 +59,23 @@ class CommandWindow extends BaseWindow {
       case Command.TYPE_SCAN:
         this.execCmdScan(command);
         break;
+      case Command.TYPE_ARREST:
+        this.execCmdArrest(command);
+        break;
+    }
+  }
+  execCmdArrest(command) {
+    var targetId = command.getArg(0);
+    if (!targetId || isNaN(targetId)) {
+      this.pushMessage('Invalid arrest usage. See help by typing:');
+      this.pushMessage('help arrest');
+    } else {
+      var target = filterWindow.getGameObjectByFilterId(targetId);
+      if (!target) {
+        this.pushMessage(sprintf('Invalid arrest ID - ID [%s] not found', targetId));
+        return;
+      }
+      mapWindow.dispatchPolice(target);
     }
   }
   execCmdScan(command) {

@@ -8,6 +8,9 @@ class Command {
   static get TYPE_SCAN() {
     return 'cmd_scan';
   }
+  static get TYPE_ARREST() {
+    return 'cmd_arrest';
+  }
   static get COMMAND_LIST() {
     return [
       {
@@ -27,6 +30,12 @@ class Command {
         'name': 'Scan',
         'commands': ['scan', 's'],
         'helpStrings': ['Use to scan to see history and determine suspicion.', 'Usage: $ scan ID', 'ID - The numeric ID on the left side of the track menu']
+      },
+      {
+        'type': Command.TYPE_ARREST,
+        'name': 'Arrest',
+        'commands': ['arrest', 'a'],
+        'helpStrings': ['Use to dispatch a police unit to capture the target.', '***** USE EXTREME CAUTION *****', 'Usage: $ arrest ID', 'ID - The numeric ID on the left side of the track menu']
       }
     ]
   }

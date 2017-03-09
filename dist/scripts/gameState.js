@@ -13,7 +13,7 @@ gameObjects = []
 class GameState {
   constructor(payload) {}
   preload() {
-    game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 8);
+    game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 10);
   }
   create() {
     this.windowStack = [];

@@ -62,6 +62,13 @@ class MapWindow extends BaseWindow {
     this.processScannedUnits();
     this.makeCall();
   }
+  dispatchPolice(target) {
+    if (target.id == roundTarget.id) {
+      console.log("WIN");
+    } else {
+      console.log("Not win");
+    }
+  }
   processScannedUnits() {
     for (var scanId in this.scannedTargets) {
       var targetData = this.scannedTargets[scanId];
