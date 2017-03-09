@@ -13,23 +13,24 @@ class MenuState {
     var startLabel = game.add.text(80, 100, '', this.fontCFG)
     var instructionsLabel = game.add.text(80, 120, '', this.fontCFG);
     this.inputLabel = game.add.text(80, 180, '', this.fontCFG);
+    var textSpeed = (DEBUG) ? 0.1 : 1;
     this.userInput = '';
     this.timers.push({
       'label': titleLabel,
-      'duration': 2500,
+      'duration': 2500 * textSpeed,
       'delay': 0,
       'text': sprintf('> %s', GAME_TITLE)
     });
     this.timers.push({
       'label': startLabel,
-      'duration': 2500,
-      'delay': 2700,
+      'duration': 2500 * textSpeed,
+      'delay': 2700 * textSpeed,
       'text': sprintf('> %s', 'Make your selection:')
     });
     this.timers.push({
       'label': instructionsLabel,
-      'duration': 2500,
-      'delay': 5500,
+      'duration': 2500 * textSpeed,
+      'delay': 5500 * textSpeed,
       'text': sprintf('#%s', ' start - start the game\n# itch - visit itch.io page\n# tweet - tweet to me')
     });
     this.blinker = new Blinker(500, 200);

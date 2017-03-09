@@ -34,6 +34,7 @@ class Person {
     this.selected = false;
     this.visible = true;
     this.tracked = false;
+    this.blinker = new Blinker(Utils.randomInRange(250, 750), Utils.randomInRange(250, 750));
   }
   canMove() {
     return this.lastMove + this.moveDelay < Date.now();
@@ -47,9 +48,9 @@ class Person {
   }
   setTracked(val) {
     this.tracked = val;
-    // BEGIN THE TRACKING
-    if (val && this.id != roundTarget.id && mapWindow.isSuspect(this.id)) {
-      this.target = roundTarget;
+    // Turn on or off the tracking if this is a suspect
+    if (this.id != roundTarget.id && mapWindow.isSuspect(this.id)) {
+      this.target = (val) ? roundTarget : undefined;
     }
   }
   update() {
@@ -57,18 +58,35 @@ class Person {
     if (this.target && this.canMove()) {
       var dX = this.target.X - this.X;
       var dY = this.target.Y - this.Y;
-      // Test for loss condition
-      if (this.target.id == roundTarget.id && Math.abs(dX) < 8 && Math.abs(dY) < 8) {
-        game.state.start('lose');
+      // Test for having arrived
+      if (Math.abs(dX) < 8 && Math.abs(dY) < 8) {
+        if (mapWindow.isSuspect(this.id) && this.target.id == roundTarget.id) {
+          game.state.start('lose');
+        } else {
+          this.target = undefined;
+        }
       } else {
-        if (Math.abs(dX) < Math.abs(dY)) {
+        if (this.blinker.blink()) {
+          if (this.target.id != roundTarget.id && Math.abs(dY) < 3) {
+            this.target = undefined;
+          }
           this._y += (0 < dY) ? 1 : -1;
         } else {
+          if (this.target.id != roundTarget.id && Math.abs(dX) < 3) {
+            this.target = undefined;
+          }
           this._x += (0 < dX) ? 1 : -1;
         }
         this.lastMove = now;
       }
     } else {
+      // Get a new target or meander about
+      if (!this.target && Math.random() < 0.03) {
+        this.target = {
+          X: Utils.randomInRange(0, WINDOW_MAP_WIDTH),
+          Y: Utils.randomInRange(0, WIN_HEIGHT - WIN_CMDHEIGHT)
+        }
+      }
       if (Math.random() < 0.05) {
         var dirX = Math.random() - 0.5;
         var dirY = Math.random() - 0.5;
