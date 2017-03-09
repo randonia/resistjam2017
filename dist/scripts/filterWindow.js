@@ -56,7 +56,7 @@ class FilterWindow extends BaseWindow {
   }
   getGameObjectByFilterId(filterId) {
     for (var i = 0; i < this.filters.length; i++) {
-      if (this.filters[i].filterId === filterId) {
+      if (this.filters[i].id === filterId) {
         return gameObjects[i];
       }
     }
@@ -64,7 +64,7 @@ class FilterWindow extends BaseWindow {
   }
   setFilterStatusByGameObjectId(id) {
     for (var i = 0; i < this.filters.length; i++) {
-      if (this.filters[i].id === id) {
+      if (this.filters[i].id == id) {
         this.filters[i].tracked = true;
         this.resetFilter();
         return gameObjects[i];

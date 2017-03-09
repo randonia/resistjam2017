@@ -75,8 +75,9 @@ class MapWindow extends BaseWindow {
         if (success) {
           logWindow.msg(sprintf('SUSPECT FOUND %s', scanId), LogWindow.MODE_WARN);
           var suspect = filterWindow.setFilterStatusByGameObjectId(scanId);
+          suspect.setHistory(this.createHistory(true));
         } else {
-          logWindow.msg(sprintf('No records found %s', scanId));
+          logWindow.msg(sprintf('No suspect records found %s', scanId));
         }
         // Remove them from the list
         delete this.scannedTargets[scanId];
