@@ -37,6 +37,12 @@ class MapWindow extends BaseWindow {
       suspectIdxs[newIdx] = newSuspect;
       suspects.push(newSuspect);
     } while (suspects.length < NUM_SUSPECTS)
+    if (DEBUG) {
+      console.log(sprintf('Target: %s', roundTarget.id));
+      console.log(suspects.map(function(item) {
+        return item.id;
+      }));
+    }
   }
   scanTarget(targetObj) {
     // See if we're already scanning
@@ -83,13 +89,15 @@ class MapWindow extends BaseWindow {
         var isSuspect = this.isSuspect(targetData.id);
         if (isSuspect || isTarget) {
           logWindow.msg(sprintf('+== Suspicious  Activity ==+'), targetData.id, LogWindow.MODE_WARN);
-          logWindow.msg(sprintf('+==      %s %s      ==+', targetData.name, targetData.id), targetData.id, LogWindow.MODE_WARN);
+          logWindow.msg(sprintf('+==      %s %s     ==+', targetData.name, targetData.id), targetData.id, LogWindow.MODE_WARN);
           var suspect = targetData.object;
           suspect.setHistory(this.createHistory(suspect));
           for (var i = 0; i < suspect.path.history.length; i++) {
             var caller = suspect.path.history[i];
             logWindow.msg(sprintf('%s >:>>callto>:>> %s', suspect.id, caller.id), targetData.id, LogWindow.MODE_WARN);
           }
+          logWindow.msg(sprintf('+== Tracking %s %s ==+', targetData.name, targetData.id), undefined, LogWindow.MODE_WARN);
+          filterWindow.forceFilter(targetData.id, true);
         } else {
           logWindow.msg(sprintf('= No info for %s [%s]=', targetData.name, targetData.id), undefined, LogWindow.MODE_BOLD);
           this.blockList[targetData.id] = Date.now();
@@ -104,6 +112,10 @@ class MapWindow extends BaseWindow {
     // Early out if this person already has a history
     if (person.path.history.length > 0) {
       return person.path.history;
+    }
+    // Give the target every suspect in history
+    if (roundTarget.id == person.id) {
+      return suspects;
     }
     // Creates a history based on being a suspect
     var isSuspect = this.isSuspect(person.id);

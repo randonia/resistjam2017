@@ -47,6 +47,10 @@ class Person {
   }
   setTracked(val) {
     this.tracked = val;
+    // BEGIN THE TRACKING
+    if (val && this.id != roundTarget.id && mapWindow.isSuspect(this.id)) {
+      this.target = roundTarget;
+    }
   }
   update() {
     var now = Date.now();
@@ -96,7 +100,7 @@ class Person {
     ctx.strokeText(drawStr, textX, this.Y);
     ctx.fillStyle = (this.tracked) ? 'yellow' : 'rgb(80,80,80)';
     ctx.fillText(drawStr, textX, this.Y);
-    if (this.target) {
+    if (this.target && DEBUG) {
       ctx.beginPath();
       ctx.lineWidth = '1';
       ctx.strokeStyle = 'gray';

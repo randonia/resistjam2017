@@ -1,4 +1,4 @@
-var DBGWINDOW = undefined;
+var DEBUG = window.location.href == "http://localhost:8000/dist/";
 // Yolojam
 filterWindow = undefined;
 commandWindow = undefined;

@@ -52,6 +52,14 @@ class FilterWindow extends BaseWindow {
     }
     this.resetFilter();
   }
+  forceFilter(id, value) {
+    for (var i = 0; i < this.filters.length; i++) {
+      if (this.filters[i].id == id) {
+        this.filters[i].tracked = value;
+      }
+    }
+    this.resetFilter()
+  }
   resetFilter() {
     mapWindow.execFilter(this.filters);
     logWindow.handleTrack(this.filters);
