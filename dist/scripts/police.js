@@ -34,7 +34,7 @@ class Police {
   render() {
     var ctx = mapWindow.bmp.ctx;
     ctx.beginPath();
-    ctx.strokeStyle = 'blue';
+    ctx.strokeStyle = 'rgb(82,127,57)';
     ctx.moveTo(this.X, this.Y);
     ctx.lineTo(this.target.X, this.target.Y);
     ctx.stroke();

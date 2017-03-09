@@ -66,6 +66,7 @@ class MapWindow extends BaseWindow {
     }
   }
   dispatchPolice(target) {
+    var police = new Police(target);
     if (target.id == roundTarget.id) {
       console.log("WIN");
     } else {
