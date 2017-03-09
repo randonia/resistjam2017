@@ -61,6 +61,9 @@ class MapWindow extends BaseWindow {
     super.update();
     this.processScannedUnits();
     this.makeCall();
+    if (this.police) {
+      this.police.update();
+    }
   }
   dispatchPolice(target) {
     if (target.id == roundTarget.id) {
@@ -204,6 +207,9 @@ class MapWindow extends BaseWindow {
     }
     for (var i = 0; i < gameObjects.length; i++) {
       gameObjects[i].render(bmd.ctx);
+    }
+    if (this.police) {
+      this.police.render();
     }
   }
 }
