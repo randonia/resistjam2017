@@ -62,8 +62,7 @@ class CommandWindow extends BaseWindow {
     }
   }
   execCmdScan(command) {
-    console.log(command);
-    var targetId = Number(command.getArg(0));
+    var targetId = command.getArg(0);
     if (!targetId || isNaN(targetId)) {
       this.pushMessage('Invalid scan usage. See help by typing:');
       this.pushMessage('help scan');
