@@ -18,7 +18,8 @@ class FilterWindow extends BaseWindow {
       this.filters.push({
         'tracked': false,
         'id': personId,
-        'name': gameObjects[i].name
+        'name': gameObjects[i].name,
+        'object': gameObjects[i]
       });
       var personSprite = game.add.sprite(0, 0, 'nodes');
       personSprite.frame = gameObjects[i].sprite.frame;
@@ -53,24 +54,13 @@ class FilterWindow extends BaseWindow {
   }
   resetFilter() {
     mapWindow.execFilter(this.filters);
+    logWindow.handleTrack(this.filters);
   }
   getGameObjectByFilterId(filterId) {
-    for (var i = 0; i < this.filters.length; i++) {
-      if (this.filters[i].id === filterId) {
-        return gameObjects[i];
-      }
-    }
-    return undefined;
-  }
-  setFilterStatusByGameObjectId(id) {
-    for (var i = 0; i < this.filters.length; i++) {
-      if (this.filters[i].id == id) {
-        this.filters[i].tracked = true;
-        this.resetFilter();
-        return gameObjects[i];
-      }
-    }
-    return undefined;
+    var filter = gameObjects.filter(function(item) {
+      return item.id == filterId;
+    })
+    return filter[0];
   }
   render() {
     super.render();
@@ -80,7 +70,7 @@ class FilterWindow extends BaseWindow {
     for (var i = 0; i < filters.length; i++) {
       var currFilter = filters[i];
       var str = sprintf("%s [%s]=[%s]", currFilter.name, currFilter.id, (currFilter.tracked ? 'X' : ' '));
-      var color = (currFilter.tracked) ? 'rgb(220, 0, 0)' : 'green';
+      var color = (currFilter.tracked) ? 'rgb(220, 220, 0)' : 'green';
       this.drawText(FIL_LIST_START_X, this.itemListY + i * FIL_LIST_PADDING_Y, str, 12, undefined, color);
       this.personSprites[currFilter.id].x = spritePaddingX;
       this.personSprites[currFilter.id].y = this.itemListY + (i + 1) * FIL_LIST_PADDING_Y;

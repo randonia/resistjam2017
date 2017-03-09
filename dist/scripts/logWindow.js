@@ -9,14 +9,19 @@ class LogWindow extends BaseWindow {
   static MODE_ALERT() {
     return 2;
   }
+  static MODE_BOLD() {
+    return 3;
+  }
   static getColor(mode) {
     switch (mode) {
       case LogWindow.MODE_MSG():
         return 'gray';
       case LogWindow.MODE_WARN():
-        return 'yellow';
+        return 'rgb(220, 220, 0)';
       case LogWindow.MODE_ALERT():
         return 'red';
+      case LogWindow.MODE_BOLD():
+        return 'rgb(200,200,200)';
     }
   }
   constructor() {
@@ -24,9 +29,21 @@ class LogWindow extends BaseWindow {
     this.logs = [];
     this.lastAdd = Date.now();
   }
-  msg(message, mode = undefined) {
+  handleTrack(trackingData) {
+    for (var tdIdx = 0; tdIdx < trackingData.length; tdIdx++) {
+      var srcId = trackingData[tdIdx].id;
+      var tracked = trackingData[tdIdx].tracked;
+      for (var lIdx = 0; lIdx < this.logs.length; lIdx++) {
+        if (this.logs[lIdx].sourceId && this.logs[lIdx].sourceId == srcId) {
+          this.logs[lIdx].mode = (tracked) ? LogWindow.MODE_WARN() : LogWindow.MODE_MSG();
+        }
+      }
+    }
+  }
+  msg(message, sourceId = undefined, mode = undefined) {
     this.logs.push({
       'message': message,
+      'sourceId': sourceId,
       'mode': (mode) ? mode() : LogWindow.MODE_MSG()
     });
   }

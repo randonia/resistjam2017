@@ -35,7 +35,7 @@ class CommandWindow extends BaseWindow {
     super.render();
     var cmdLen = this.cmdMessages.length;
     for (var i = cmdLen - 1; i >= 0; i--) {
-      this.drawText(CMD_START_X, CMD_HIST_START_Y - CMD_PADDING * (cmdLen - i - 1), this.cmdMessages[i], 12);
+      this.drawText(CMD_START_X, CMD_HIST_START_Y - CMD_PADDING * (cmdLen - i - 1), this.cmdMessages[i]);
     }
     var cmdStr = sprintf('$ %s%s', this.cmdCurrentStr, (this.blinker.blink()) ? '_' : '');
     this.drawText(CMD_START_X, CMD_START_Y, cmdStr);
