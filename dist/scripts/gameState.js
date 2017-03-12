@@ -1,4 +1,4 @@
-var DEBUG = window.location.href == "http://localhost:8000/dist/";
+var DEBUG = (window.location.href == "http://localhost:8000/dist/") || (window.location.href == "http://randonia.com/resistjam2017/?DEBUG=1");
 // Yolojam
 filterWindow = undefined;
 commandWindow = undefined;
