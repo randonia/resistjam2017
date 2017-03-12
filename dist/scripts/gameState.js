@@ -31,9 +31,12 @@ class GameState {
     this.initKeyboardHandlers();
     // Create the music
     var bgm = game.add.audio('bgm');
+    bgm.loop = true;
     bgm.play();
     for (var c = 0; c < NUM_CLICKS; ++c) {
-      clicks.push(game.add.audio(sprintf('click%s', c)));
+      var newSound = game.add.audio(sprintf('click%s', c));
+      newSound.volume = 0.5;
+      clicks.push(newSound);
     }
   }
   initWindowStack() {
