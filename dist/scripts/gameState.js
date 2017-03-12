@@ -12,6 +12,7 @@ WINDOW_LOG_WIDTH = WIN_WIDTH - WINDOW_FILTER_WIDTH - WINDOW_MAP_WIDTH;
 gameObjects = []
 clicks = [];
 NUM_CLICKS = 13;
+bgm = undefined;
 class GameState {
   constructor(payload) {}
   preload() {
@@ -30,9 +31,11 @@ class GameState {
     // Handle inputs
     this.initKeyboardHandlers();
     // Create the music
-    var bgm = game.add.audio('bgm');
-    bgm.loop = true;
-    bgm.play();
+    if (!bgm) {
+      bgm = game.add.audio('bgm');
+      bgm.loop = true;
+      bgm.play();
+    }
     for (var c = 0; c < NUM_CLICKS; ++c) {
       var newSound = game.add.audio(sprintf('click%s', c));
       newSound.volume = 0.5;
