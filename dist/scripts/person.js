@@ -28,16 +28,11 @@ class Person {
     this.path = new TrackedPath(this);
     this.sprite = game.add.sprite(x, y, 'nodes');
     this.sprite.frame = (Math.random() < 0.25) ? 4 : (Math.random() < 0.5) ? 5 : (Math.random() < 0.75) ? 6 : 7;
-    this.target = undefined;
     this.moveDelay = (DEBUG) ? 50 : 500;
     this.lastMove = Number.MIN_VALUE;
     this.selected = false;
     this.visible = true;
     this.tracked = false;
-    this.blinker = new Blinker(Utils.randomInRange(250, 750), Utils.randomInRange(250, 750));
-  }
-  canMove() {
-    return this.lastMove + this.moveDelay < Date.now();
   }
   setHistory(history) {
     this.path.setHistory(history);
@@ -48,63 +43,27 @@ class Person {
   }
   setTracked(val) {
     this.tracked = val;
-    // Turn on or off the tracking if this is a suspect
-    if (this.id != roundTarget.id && mapWindow.isSuspect(this.id)) {
-      this.target = (val) ? roundTarget : undefined;
-    }
   }
   update() {
     var now = Date.now();
-    if (this.target && this.canMove()) {
-      var dX = this.target.X - this.X;
-      var dY = this.target.Y - this.Y;
-      // Test for having arrived
-      if (Math.abs(dX) < 8 && Math.abs(dY) < 8) {
-        if (mapWindow.isSuspect(this.id) && this.target.id == roundTarget.id) {
-          game.state.start('lose');
-        } else {
-          this.target = undefined;
-        }
-      } else {
-        if (this.blinker.blink()) {
-          if (this.target.id != roundTarget.id && Math.abs(dY) < 3) {
-            this.target = undefined;
-          }
-          this._y += (0 < dY) ? 1 : -1;
-        } else {
-          if (this.target.id != roundTarget.id && Math.abs(dX) < 3) {
-            this.target = undefined;
-          }
-          this._x += (0 < dX) ? 1 : -1;
-        }
-        this.lastMove = now;
+    // Meander about
+    if (Math.random() < 0.05) {
+      var dirX = Math.random() - 0.5;
+      var dirY = Math.random() - 0.5;
+      this._x += dirX;
+      this._y += dirY;
+      // Bounds correcting
+      if (this._x < 0) {
+        this._x += 1;
       }
-    } else {
-      // Get a new target or meander about
-      if (!this.target && Math.random() < 0.03) {
-        this.target = {
-          X: Utils.randomInRange(0, WINDOW_MAP_WIDTH),
-          Y: Utils.randomInRange(0, WIN_HEIGHT - WIN_CMDHEIGHT)
-        }
+      if (WIN_WIDTH / 2 - NODE_SIZE < this._x) {
+        this._x -= 1;
       }
-      if (Math.random() < 0.05) {
-        var dirX = Math.random() - 0.5;
-        var dirY = Math.random() - 0.5;
-        this._x += dirX;
-        this._y += dirY;
-        // Bounds correcting
-        if (this._x < 0) {
-          this._x += 1;
-        }
-        if (WIN_WIDTH / 2 - NODE_SIZE < this._x) {
-          this._x -= 1;
-        }
-        if (this._y < 0) {
-          this._y += 1;
-        }
-        if (WIN_HEIGHT - WIN_CMDHEIGHT - NODE_SIZE < this._y) {
-          this._y -= 1;
-        }
+      if (this._y < 0) {
+        this._y += 1;
+      }
+      if (WIN_HEIGHT - WIN_CMDHEIGHT - NODE_SIZE < this._y) {
+        this._y -= 1;
       }
     }
     this.sprite.x = this._x;

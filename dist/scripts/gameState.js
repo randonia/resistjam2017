@@ -26,8 +26,7 @@ class GameState {
   }
   initWindowStack() {
     this.currentWindowIndex = 0;
-    // This ensures the mapwindow is the lowest order
-    mapWindow = new MapWindow();
+    logWindow = new LogWindow();
     // Man this is janky. Javascript you freaky.
     var filterHeader = new BaseWindow(0, 0, WINDOW_FILTER_WIDTH, 25, BaseWindow.TYPE_HEADER);
     filterHeader.render = function() {
@@ -40,15 +39,28 @@ class GameState {
       bmd.ctx.strokeRect(0, 0, this.width, this.height);
       this.drawText(this.width * 0.5, 18, 'TRACKING', undefined, 'center');
     }
-    filterWindow = new FilterWindow();
-    logWindow = new LogWindow();
+    var logHeader = new BaseWindow(WINDOW_FILTER_WIDTH + WINDOW_MAP_WIDTH, 0, WINDOW_LOG_WIDTH, 25, BaseWindow.TYPE_HEADER);
+    logHeader.render = function() {
+      var bmd = this.bmp;
+      bmd.clear();
+      bmd.ctx.lineWidth = '2';
+      bmd.ctx.strokeStyle = (this.selected) ? 'green' : '#535f53';
+      bmd.ctx.fillStyle = '#111';
+      bmd.ctx.fillRect(0, 0, this.width, this.height);
+      bmd.ctx.strokeRect(0, 0, this.width, this.height);
+      this.drawText(this.width * 0.5, 18, 'PHONE "METADATA"', undefined, 'center');
+    }
     commandWindow = new CommandWindow();
+    mapWindow = new MapWindow();
+    filterWindow = new FilterWindow();
     this.windowStack.push(filterWindow);
     this.windowStack.push(filterHeader);
     this.windowStack.push(mapWindow);
     this.windowStack.push(logWindow);
+    this.windowStack.push(logHeader);
     this.windowStack.push(commandWindow);
     filterHeader.sprite.bringToTop();
+    commandWindow.sprite.bringToTop();
   }
   initKeyboardHandlers() {
     this.keys = {};

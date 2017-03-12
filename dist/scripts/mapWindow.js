@@ -1,21 +1,21 @@
 // Center Window - for showing the map
-NUM_NODES = 500;
-NUM_PEOPLE = 50;
-NUM_SUSPECTS = 15;
+NUM_PEOPLE = 150;
+NUM_SUSPECTS = 20;
 NODE_SIZE = 16;
 SCAN_DURATION = 4000;
 roundTarget = undefined;
 suspects = [];
+firstScan = true;
 class MapWindow extends BaseWindow {
   constructor() {
     super(WINDOW_FILTER_WIDTH, 0, WINDOW_MAP_WIDTH, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     gameObjects = [];
-    this.generatePeople({});
-    this.setupRound();
     this.callCooldown = 500;
     this.lastCallMade = Number.MIN_VALUE;
     this.scannedTargets = {};
     this.blockList = {};
+    this.generatePeople({});
+    this.setupRound();
   }
   generatePeople(seed) {
     for (var i = 0; i < (seed['numPeople'] || NUM_PEOPLE); i++) {
@@ -41,8 +41,20 @@ class MapWindow extends BaseWindow {
       console.log(sprintf('Target: %s', roundTarget.id));
       console.log(suspects.map(function(item) {
         return item.id;
-      }));
+      }).sort());
     }
+    // Start out by scanning one suspect
+    var startingScan = suspects[0];
+    var tutorialLog = [
+      sprintf("We've received word that %s [%s] is a likely suspect. We're staring you off by", startingScan.name, startingScan.id),
+      sprintf("scanning %s which should reveal the most contacted sources. That should give you a", startingScan.name),
+      sprintf("good jumping off point to begin scanning others to find the leader of this ring."),
+    ]
+    for (var i = 0; i < tutorialLog.length; i++) {
+      commandWindow.pushMessage(tutorialLog[i]);
+    }
+    commandWindow.pushMessage(sprintf("scan %s", startingScan.id), true);
+    this.scanTarget(startingScan);
   }
   scanTarget(targetObj) {
     // See if we're already scanning
@@ -94,7 +106,8 @@ class MapWindow extends BaseWindow {
           suspect.setHistory(this.createHistory(suspect));
           for (var i = 0; i < suspect.path.history.length; i++) {
             var caller = suspect.path.history[i];
-            logWindow.msg(sprintf('%s >:>>callto>:>> %s', suspect.id, caller.id), targetData.id, LogWindow.MODE_WARN);
+            var msg = sprintf('%s >:>>callto>:>> %s', suspect.id, caller.id);
+            logWindow.msg(msg, targetData.id);
           }
           logWindow.msg(sprintf('+== Tracking %s %s ==+', targetData.name, targetData.id), undefined, LogWindow.MODE_WARN);
           filterWindow.forceFilter(targetData.id, true);
@@ -125,7 +138,8 @@ class MapWindow extends BaseWindow {
       history.push(roundTarget);
       historyIds[roundTarget.id] = 1;
     }
-    var numToMake = Utils.randomInRange(10, 15);
+    // Push 5 normal people and 3 suspects
+    var numToMake = 5;
     for (var ct = 0; ct < numToMake; ++ct) {
       do {
         var randIdx = Utils.randomInRange(0, gameObjects.length);
@@ -135,6 +149,18 @@ class MapWindow extends BaseWindow {
           history.push(selectedCaller);
         }
       } while (!historyIds[randIdx])
+    }
+    var suspectsToMake = 3;
+    var antiInfiniloop = 10;
+    for (var ct = 0; ct < numToMake; ++ct) {
+      do {
+        var randIdx = Utils.randomInRange(0, suspects.length);
+        var selectedCaller = suspects[randIdx];
+        if (!historyIds[randIdx] && selectedCaller.id != roundTarget.id && selectedCaller.id != person.id) {
+          historyIds[randIdx] = 1;
+          history.push(selectedCaller);
+        }
+      } while (!historyIds[randIdx] && antiInfiniloop-- > 0)
     }
     return history;
   }
@@ -150,7 +176,7 @@ class MapWindow extends BaseWindow {
       gameObjects[srcIdx].path.addConnection(gameObjects[dstIdx]);
       var mode = LogWindow.MODE_MSG;
       var message = sprintf('%s >::>>link>>::> %s', gameObjects[srcIdx].id, gameObjects[dstIdx].id);
-      if (gameObjects[srcIdx].tracked) {
+      if (gameObjects[srcIdx].tracked || gameObjects[dstIdx].tracked) {
         mode = LogWindow.MODE_WARN;
       }
       logWindow.msg(message, gameObjects[srcIdx].id, mode);
