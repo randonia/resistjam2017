@@ -10,17 +10,10 @@ WINDOW_FILTER_WIDTH = WIN_WIDTH * 0.23;
 WINDOW_MAP_WIDTH = WIN_WIDTH * 0.5;
 WINDOW_LOG_WIDTH = WIN_WIDTH - WINDOW_FILTER_WIDTH - WINDOW_MAP_WIDTH;
 gameObjects = []
-clicks = [];
-NUM_CLICKS = 13;
-bgm = undefined;
 class GameState {
   constructor(payload) {}
   preload() {
     game.load.spritesheet('nodes', 'assets/sprites/nodes.png', 16, 16, 10);
-    for (var c = 0; c < NUM_CLICKS; ++c) {
-      game.load.audio(sprintf("click%s", c), sprintf('assets/audio/click%s.mp3', c));
-    }
-    game.load.audio('bgm', 'assets/audio/bensound-scifi.mp3');
   }
   create() {
     this.windowStack = [];
@@ -30,17 +23,6 @@ class GameState {
     this.initShader();
     // Handle inputs
     this.initKeyboardHandlers();
-    // Create the music
-    if (!bgm) {
-      bgm = game.add.audio('bgm');
-      bgm.loop = true;
-      bgm.play();
-    }
-    for (var c = 0; c < NUM_CLICKS; ++c) {
-      var newSound = game.add.audio(sprintf('click%s', c));
-      newSound.volume = 0.5;
-      clicks.push(newSound);
-    }
   }
   initWindowStack() {
     this.currentWindowIndex = 0;
@@ -137,14 +119,10 @@ class GameState {
     this._submitEvent('onDownCallback', event);
   }
   _submitEvent(funcName, event) {
-    this.playRandomKey();
+    playRandomKey();
     for (var i = 0; i < this.windowStack.length; i++) {
       this.windowStack[i][funcName](event);
     }
-  }
-  playRandomKey() {
-    var idx = Utils.randomInRange(0, clicks.length);
-    clicks[idx].play();
   }
   initShader() {
     // Taken from and modified: http://glslsandbox.com/e#18578.0

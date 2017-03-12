@@ -22,19 +22,22 @@ class LoseState {
       'label': titleLabel,
       'duration': 4500 * textSpeed,
       'delay': 0,
-      'text': failureMessage
+      'text': failureMessage,
+      'lastIdx': -1
     });
     this.timers.push({
       'label': startLabel,
       'duration': 1500 * textSpeed,
       'delay': 4500 * textSpeed,
-      'text': sprintf('> %s', 'Make your selection:')
+      'text': sprintf('> %s', 'Make your selection:'),
+      'lastIdx': -1
     });
     this.timers.push({
       'label': instructionsLabel,
       'duration': 2500 * textSpeed,
       'delay': (4500 + 1500) * textSpeed,
-      'text': '# restart - Try again\n# menu - Go to the main menu'
+      'text': '# restart - Try again\n# menu - Go to the main menu',
+      'lastIdx': -1
     });
     this.blinker = new Blinker(500, 200);
     // Plaintext input
@@ -65,6 +68,10 @@ class LoseState {
         continue;
       }
       var currLetterIdx = Math.floor(timer.text.length * (now - timer.start) / timer.duration)
+      if (currLetterIdx != timer.lastIdx) {
+        playRandomKey();
+        timer.lastIdx = currLetterIdx;
+      }
       timer.label.text = sprintf('%s%s', timer.text.substr(0, currLetterIdx), (this.blinker.blink()) ? '_' : '');
     }
     if (this.timers.length == 0) {
@@ -75,6 +82,7 @@ class LoseState {
     if (this.timers.length == 0) {
       this.userInput = this.userInput.substr(0, this.userInput.length - 1);
     }
+    playRandomKey();
   }
   onEnter(event) {
     switch (this.userInput) {
@@ -87,11 +95,13 @@ class LoseState {
         this.execMenu();
         break;
     }
+    playRandomKey();
   }
   onDownCallback(event) {
     if (this.timers.length == 0) {
       this.userInput += event;
     }
+    playRandomKey();
   }
   execStart() {
     game.state.start('game');

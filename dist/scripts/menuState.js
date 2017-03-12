@@ -1,8 +1,33 @@
 GAME_TITLE = 'SOMEBODY_IS_LISTENING';
 TWITTER_HANDLE = '@zambini845';
 ITCH_IO_URL = 'https://zambini.itch.io/somebody-is-listening'
+clicks = [];
+NUM_CLICKS = 13;
+bgm = undefined;
+SFX_FADE_IN_INTERVAL = undefined;
+
+function playRandomKey() {
+  var idx = Utils.randomInRange(0, clicks.length);
+  clicks[idx].play();
+}
 class MenuState {
+  preload() {
+    for (var c = 0; c < NUM_CLICKS; ++c) {
+      game.load.audio(sprintf("click%s", c), sprintf('assets/audio/click%s.mp3', c));
+    }
+    game.load.audio('bgm', 'assets/audio/bensound-scifi.mp3');
+  }
   create() {
+    // Create the music
+    if (!bgm) {
+      bgm = game.add.audio('bgm');
+      bgm.loop = true;
+    }
+    for (var c = 0; c < NUM_CLICKS; ++c) {
+      var newSound = game.add.audio(sprintf('click%s', c));
+      newSound.volume = 0.5;
+      clicks.push(newSound);
+    }
     this.gameStart = Date.now();
     this.timers = [];
     this.fontCFG = {
@@ -19,19 +44,22 @@ class MenuState {
       'label': titleLabel,
       'duration': 2500 * textSpeed,
       'delay': 0,
-      'text': sprintf('> %s', GAME_TITLE)
+      'text': sprintf('> %s', GAME_TITLE),
+      'lastIdx': -1
     });
     this.timers.push({
       'label': startLabel,
       'duration': 2500 * textSpeed,
       'delay': 2700 * textSpeed,
-      'text': sprintf('> %s', 'Make your selection:')
+      'text': sprintf('> %s', 'Make your selection:'),
+      'lastIdx': -1
     });
     this.timers.push({
       'label': instructionsLabel,
       'duration': 2500 * textSpeed,
       'delay': 5500 * textSpeed,
-      'text': sprintf('#%s', ' start - start the game\n# itch - visit itch.io page\n# tweet - tweet to me')
+      'text': sprintf('#%s', ' start - start the game\n# itch - visit itch.io page\n# tweet - tweet to me'),
+      'lastIdx': -1
     });
     this.blinker = new Blinker(500, 200);
     // Plaintext input
@@ -61,18 +89,34 @@ class MenuState {
         continue;
       }
       var currLetterIdx = Math.floor(timer.text.length * (now - timer.start) / timer.duration)
+      if (currLetterIdx != timer.lastIdx) {
+        playRandomKey();
+        timer.lastIdx = currLetterIdx;
+      }
       timer.label.text = sprintf('%s%s', timer.text.substr(0, currLetterIdx), (this.blinker.blink()) ? '_' : '');
     }
     if (this.timers.length == 0) {
       this.inputLabel.text = sprintf('> %s%s', this.userInput, (this.blinker.blink()) ? '_' : '');
+      if (!bgm.isPlaying) {
+        bgm.play();
+        bgm.volume = 0;
+        SFX_FADE_IN_INTERVAL = setInterval(function() {
+          bgm.volume = bgm.volume + 0.05;
+          if (bgm.volume >= 1) {
+            clearInterval(SFX_FADE_IN_INTERVAL);
+          }
+        }, 250);
+      }
     }
   }
   onBackspace(event) {
     if (this.timers.length == 0) {
       this.userInput = this.userInput.substr(0, this.userInput.length - 1);
     }
+    playRandomKey();
   }
   onEnter(event) {
+    playRandomKey();
     switch (this.userInput) {
       case 'start':
         this.userInput = '';
@@ -89,6 +133,7 @@ class MenuState {
     }
   }
   onDownCallback(event) {
+    playRandomKey();
     if (this.timers.length == 0) {
       this.userInput += event;
     }

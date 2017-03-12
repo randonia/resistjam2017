@@ -17,19 +17,22 @@ class WinState {
       'label': titleLabel,
       'duration': 4500 * textSpeed,
       'delay': 0,
-      'text': winMessage
+      'text': winMessage,
+      'lastIdx': -1
     });
     this.timers.push({
       'label': startLabel,
       'duration': 1500 * textSpeed,
       'delay': 4500 * textSpeed,
-      'text': sprintf('> %s', 'Make your selection:')
+      'text': sprintf('> %s', 'Make your selection:'),
+      'lastIdx': -1
     });
     this.timers.push({
       'label': instructionsLabel,
       'duration': 2500 * textSpeed,
       'delay': (4500 + 1500) * textSpeed,
-      'text': '# tweet - Tweet sweet, sweet victory\n# menu - Go to the main menu'
+      'text': '# tweet - Tweet sweet, sweet victory\n# menu - Go to the main menu',
+      'lastIdx': -1
     });
     this.blinker = new Blinker(500, 200);
     // Plaintext input
@@ -43,7 +46,6 @@ class WinState {
     // Enter key
     var keyEnter = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
     keyEnter.onDown.add(this.onEnter, this);
-    console.log(APPREHENDED_SUSPECT);
   }
   update() {
     var now = Date.now();
@@ -60,6 +62,10 @@ class WinState {
         continue;
       }
       var currLetterIdx = Math.floor(timer.text.length * (now - timer.start) / timer.duration)
+      if (currLetterIdx != timer.lastIdx) {
+        playRandomKey();
+        timer.lastIdx = currLetterIdx;
+      }
       timer.label.text = sprintf('%s%s', timer.text.substr(0, currLetterIdx), (this.blinker.blink()) ? '_' : '');
     }
     if (this.timers.length == 0) {
@@ -70,6 +76,7 @@ class WinState {
     if (this.timers.length == 0) {
       this.userInput = this.userInput.substr(0, this.userInput.length - 1);
     }
+    playRandomKey();
   }
   onEnter(event) {
     switch (this.userInput) {
@@ -82,11 +89,13 @@ class WinState {
         this.execMenu();
         break;
     }
+    playRandomKey();
   }
   onDownCallback(event) {
     if (this.timers.length == 0) {
       this.userInput += event;
     }
+    playRandomKey();
   }
   execTweet() {
     var url = encodeURI(sprintf('https://twitter.com/intent/tweet?text=I apprehended %s in %s. %s %s', APPREHENDED_SUSPECT.name, GAME_TITLE, ITCH_IO_URL, TWITTER_HANDLE));
