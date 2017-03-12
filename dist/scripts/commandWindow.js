@@ -19,14 +19,19 @@ class CommandWindow extends BaseWindow {
     this.cmdCurrentStr += key;
   }
   onUpArrow(event) {
-    this.historyTracker = Math.max(this.historyTracker - 1, 0);
+    if (this.historyTracker != undefined) {
+      this.historyTracker = Math.max(this.historyTracker - 1, 0);
+    } else {
+      this.historyTracker = this.cmdHistory.length - 1;
+    }
     this.cmdCurrentStr = this.cmdHistory[this.historyTracker];
   }
   onDownArrow(event) {
-    if (this.historyTracker >= this.cmdHistory.length - 1) {
+    this.historyTracker++;
+    if (this.historyTracker >= this.cmdHistory.length || isNaN(this.historyTracker)) {
+      this.historyTracker = undefined;
       this.cmdCurrentStr = '';
     } else {
-      this.historyTracker = Math.min(this.historyTracker + 1, this.cmdHistory.length - 1);
       this.cmdCurrentStr = this.cmdHistory[this.historyTracker];
     }
   }
@@ -81,7 +86,7 @@ class CommandWindow extends BaseWindow {
         this.execCmdIgnore(command);
         break;
     }
-    this.historyTracker = this.cmdHistory.length + 1;
+    this.historyTracker = undefined;
   }
   execCmdArrest(command) {
     var targetId = command.getArg(0);
