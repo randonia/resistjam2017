@@ -3,17 +3,32 @@ CMD_START_X = 5;
 CMD_START_Y = WIN_CMDHEIGHT - 5;
 CMD_PADDING = 14;
 CMD_HIST_START_Y = CMD_START_Y - CMD_PADDING;
+CMD_NUM_SCANS = 11;
 class CommandWindow extends BaseWindow {
   constructor() {
     super(0, WIN_HEIGHT - WIN_CMDHEIGHT, 800, WIN_CMDHEIGHT, BaseWindow.TYPE_COMMAND);
     this.cmdHistory = [];
+    this.historyTracker = 0;
     this.cmdMessages = [];
     this.cmdCurrentStr = '';
     this.blinker = new Blinker(500, 200);
+    CMD_NUM_SCANS = 11;
   }
   // Events
   onDownCallback(key) {
     this.cmdCurrentStr += key;
+  }
+  onUpArrow(event) {
+    this.historyTracker = Math.max(this.historyTracker - 1, 0);
+    this.cmdCurrentStr = this.cmdHistory[this.historyTracker];
+  }
+  onDownArrow(event) {
+    if (this.historyTracker >= this.cmdHistory.length - 1) {
+      this.cmdCurrentStr = '';
+    } else {
+      this.historyTracker = Math.min(this.historyTracker + 1, this.cmdHistory.length - 1);
+      this.cmdCurrentStr = this.cmdHistory[this.historyTracker];
+    }
   }
   onBackspace(event) {
     var rmWholeWord = game.input.keyboard.isDown(Phaser.KeyCode.CONTROL);
@@ -62,7 +77,11 @@ class CommandWindow extends BaseWindow {
       case Command.TYPE_ARREST:
         this.execCmdArrest(command);
         break;
+      case Command.TYPE_IGNORE:
+        this.execCmdIgnore(command);
+        break;
     }
+    this.historyTracker = this.cmdHistory.length + 1;
   }
   execCmdArrest(command) {
     var targetId = command.getArg(0);
@@ -78,11 +97,32 @@ class CommandWindow extends BaseWindow {
       mapWindow.dispatchPolice(target);
     }
   }
+  execCmdIgnore(command) {
+    var targetId = command.getArg(0);
+    if (!targetId || isNaN(targetId)) {
+      this.pushMessage('Invalid ignore usage. See help by typing:');
+      this.pushMessage('help ignore');
+    } else {
+      var target = filterWindow.getGameObjectByFilterId(targetId);
+      if (!target) {
+        this.pushMessage(sprintf('Invalid arrest ID - ID [%s] not found', targetId));
+        return;
+      }
+      if (mapWindow.blockList[targetId]) {
+        delete mapWindow.blockList[targetId];
+      } else {
+        mapWindow.blockList[targetId] = 1;
+      }
+    }
+  }
   execCmdScan(command) {
     var targetId = command.getArg(0);
     if (!targetId || isNaN(targetId)) {
       this.pushMessage('Invalid scan usage. See help by typing:');
       this.pushMessage('help scan');
+    } else if (CMD_NUM_SCANS <= 0) {
+      this.pushMessage('No more available secret court warrants!');
+      this.pushMessage('You now need to make an arrest');
     } else {
       var target = filterWindow.getGameObjectByFilterId(targetId);
       if (!target) {
@@ -120,10 +160,7 @@ class CommandWindow extends BaseWindow {
     } else {
       // Otherwise get all the commands listed
       for (var cIdx = 0; cIdx < allCommands.length; cIdx++) {
-        var cmdHelpStr = sprintf("%s", allCommands[cIdx].commands.map(function(cmdStr) {
-          return sprintf("[%s]", cmdStr);
-        }));
-        helpStrings.push(sprintf('%s - %s', allCommands[cIdx].name, cmdHelpStr));
+        helpStrings.push(sprintf('%s', allCommands[cIdx].commands[0]));
         if (allCommands[cIdx].type == Command.TYPE_HELP) {
           for (var hIdx = 0; hIdx < allCommands[cIdx].helpStrings.length; hIdx++) {
             helpStrings.push(sprintf('  %s', allCommands[cIdx].helpStrings[hIdx]));

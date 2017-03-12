@@ -33,6 +33,8 @@ class BaseWindow {
   initialize() {
     this.bmp = game.add.bitmapData(this.width, this.height);
     this.sprite = game.add.sprite(this.x, this.y, this.bmp);
+    this.textBmp = game.add.bitmapData(this.width, this.height);
+    this.textSprite = game.add.sprite(this.x, this.y, this.textBmp);
   }
   update() {}
   render() {
@@ -43,6 +45,7 @@ class BaseWindow {
     bmd.ctx.fillStyle = '#111';
     bmd.ctx.fillRect(0, 0, this.width, this.height);
     bmd.ctx.strokeRect(0, 0, this.width, this.height);
+    this.textBmp.clear();
   }
   addChild(sprite) {
     this.sprite.addChild(sprite);
@@ -65,6 +68,8 @@ class BaseWindow {
   onDownCallback(event) {} // Empty event default
   onBackspace(event) {} // Empty event default
   onEnter(event) {} // Empty event default
-  onPageUp(event) {} //
-  onPageDown(event) {} //
+  onUpArrow(event) {} // Empty event default
+  onDownArrow(event) {} // Empty event default
+  onPageUp(event) {} // Empty event default
+  onPageDown(event) {} // Empty event default
 }

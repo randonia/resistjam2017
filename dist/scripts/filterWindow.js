@@ -61,6 +61,10 @@ class FilterWindow extends BaseWindow {
     this.resetFilter()
   }
   resetFilter() {
+    // Reset everyone's tracked count
+    for (var i = gameObjects.length - 1; i >= 0; i--) {
+      gameObjects[i].trackedCount = 0;
+    }
     mapWindow.execFilter(this.filters);
     logWindow.handleTrack(this.filters);
   }
@@ -77,7 +81,8 @@ class FilterWindow extends BaseWindow {
     var spritePaddingX = 0;
     for (var i = 0; i < filters.length; i++) {
       var currFilter = filters[i];
-      var str = sprintf("%s [%s]=[%s]", currFilter.name, currFilter.id, (currFilter.tracked ? 'X' : ' '));
+      var ignored = mapWindow.blockList[currFilter.id];
+      var str = sprintf("%s [%s]:[%s] %s", currFilter.name, currFilter.id, (currFilter.tracked ? 'X' : ' '), (ignored) ? 'ign' : ' ');
       var color = (currFilter.tracked) ? 'rgb(220, 220, 0)' : 'green';
       this.drawText(FIL_LIST_START_X, this.itemListY + i * FIL_LIST_PADDING_Y, str, 12, undefined, color);
       this.personSprites[currFilter.id].x = spritePaddingX;

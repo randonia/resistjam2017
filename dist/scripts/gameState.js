@@ -87,12 +87,24 @@ class GameState {
     var keyPageDown = game.input.keyboard.addKey(Phaser.Keyboard.PAGE_DOWN);
     keyPageDown.onDown.add(this.onPageDown, this);
     this.keys['pageDown'] = keyPageDown;
+    var keyUpArrow = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+    keyUpArrow.onDown.add(this.onUpArrow, this);
+    this.keys['upArrow'] = keyUpArrow;
+    var keyDownArrow = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+    keyDownArrow.onDown.add(this.onDownArrow, this);
+    this.keys['downArrow'] = keyDownArrow;
   }
   onPageUp(event) {
     this._submitEvent('onPageUp', event);
   }
   onPageDown(event) {
     this._submitEvent('onPageDown', event);
+  }
+  onUpArrow(event) {
+    this._submitEvent('onUpArrow', event);
+  }
+  onDownArrow(event) {
+    this._submitEvent('onDownArrow', event);
   }
   onTabKey(event) {
     this._submitEvent('onTabKey', event);

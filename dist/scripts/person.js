@@ -33,6 +33,7 @@ class Person {
     this.selected = false;
     this.visible = true;
     this.tracked = false;
+    this.trackCount = 0;
   }
   setHistory(history) {
     this.path.setHistory(history);
@@ -43,6 +44,10 @@ class Person {
   }
   setTracked(val) {
     this.tracked = val;
+    // Inc or dec each target this is tracking. Used to determine if it should render its text
+    for (var i = 0; i < this.path.connections.length; i++) {
+      this.path.connections[i].link.trackCount += (val) ? 1 : 0;
+    }
   }
   update() {
     var now = Date.now();
@@ -70,26 +75,19 @@ class Person {
     this.sprite.y = this._y;
   }
   render() {
-    if (!this.visible) {
+    if (!this.visible || mapWindow.blockList[this.id]) {
       return;
     }
-    var ctx = mapWindow.bmp.ctx;
-    var textX = (this.X < WIN_WIDTH / 2 - 65) ? this.X + 8 : this.X - 55;
-    ctx.font = sprintf("%spx %s", 11, DEFAULT_FONT);
-    var drawStr = sprintf('%s %s', this.name, this.id);
-    ctx.lineJoin = 'bevel';
-    ctx.strokeStyle = 'black';
-    ctx.strokeText(drawStr, textX, this.Y);
-    ctx.fillStyle = (this.tracked) ? 'yellow' : 'rgb(80,80,80)';
-    ctx.fillText(drawStr, textX, this.Y);
-    if (this.target && DEBUG) {
-      ctx.beginPath();
-      ctx.lineWidth = '1';
-      ctx.strokeStyle = 'gray';
-      ctx.moveTo(this.X, this.Y);
-      ctx.lineTo(this.target.X, this.target.Y);
-      ctx.stroke();
-      ctx.closePath();
+    if (this.tracked || this.trackCount > 0) {
+      var ctx = mapWindow.textBmp.ctx;
+      var textX = (this.X < WIN_WIDTH / 2 - 65) ? this.X + 8 : this.X - 55;
+      ctx.font = sprintf("%spx %s", 11, DEFAULT_FONT);
+      var drawStr = sprintf('%s %s', this.name, this.id);
+      ctx.lineJoin = 'bevel';
+      ctx.strokeStyle = 'black';
+      ctx.strokeText(drawStr, textX, this.Y);
+      ctx.fillStyle = (this.tracked) ? 'yellow' : 'rgb(180,180,180)';
+      ctx.fillText(drawStr, textX, this.Y);
     }
   }
   getAbbreviation() {

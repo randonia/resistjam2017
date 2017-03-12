@@ -10,6 +10,7 @@ class MapWindow extends BaseWindow {
   constructor() {
     super(WINDOW_FILTER_WIDTH, 0, WINDOW_MAP_WIDTH, WIN_HEIGHT - WIN_CMDHEIGHT, BaseWindow.TYPE_MAP);
     gameObjects = [];
+    suspects = []
     this.callCooldown = 500;
     this.lastCallMade = Number.MIN_VALUE;
     this.scannedTargets = {};
@@ -53,7 +54,9 @@ class MapWindow extends BaseWindow {
     for (var i = 0; i < tutorialLog.length; i++) {
       commandWindow.pushMessage(tutorialLog[i]);
     }
-    commandWindow.pushMessage(sprintf("scan %s", startingScan.id), true);
+    var firstCmd = sprintf("scan %s", startingScan.id);
+    commandWindow.pushMessage(firstCmd, true);
+    commandWindow.cmdHistory.push(firstCmd);
     this.scanTarget(startingScan);
   }
   scanTarget(targetObj) {
@@ -68,6 +71,8 @@ class MapWindow extends BaseWindow {
       'id': targetObj.id,
       'name': targetObj.name
     }
+    CMD_NUM_SCANS--;
+    commandWindow.pushMessage(sprintf("Scan started. %s scans remaining", CMD_NUM_SCANS));
   }
   execFilter(filters) {
     for (var i = 0; i < filters.length; i++) {
@@ -107,7 +112,7 @@ class MapWindow extends BaseWindow {
           for (var i = 0; i < suspect.path.history.length; i++) {
             var caller = suspect.path.history[i];
             var msg = sprintf('%s >:>>callto>:>> %s', suspect.id, caller.id);
-            logWindow.msg(msg, targetData.id);
+            logWindow.msg(msg, targetData.id, (this.isSuspect(caller.id)) ? LogWindow.MODE_ALERT : LogWindow.MODE_WARN);
           }
           logWindow.msg(sprintf('+== Tracking %s %s ==+', targetData.name, targetData.id), undefined, LogWindow.MODE_WARN);
           filterWindow.forceFilter(targetData.id, true);
